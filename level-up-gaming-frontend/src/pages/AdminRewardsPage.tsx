@@ -5,7 +5,7 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import { Container, Table, Alert, Spinner, Badge, Button, Modal, Row, Col, Form, Card, ButtonGroup } from 'react-bootstrap';
 import { Edit, Trash, ArrowLeft, PlusCircle, Check, X, AlertTriangle } from 'react-feather';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { apiClient } from '../context/AuthContext';
 
 import AdminLayout from '../layouts/AdminLayout';
 
@@ -21,7 +21,7 @@ interface Reward {
     imageUrl: string;
 }
 
-const API_URL = '/api/rewards';
+const API_URL = '/rewards';
 const REWARD_TYPES = ['Producto', 'Descuento', 'Envio'];
 const REWARD_SEASONS = ['Standard', 'Halloween', 'Navidad', 'BlackFriday', 'Verano'];
 
@@ -43,7 +43,7 @@ const AdminRewardsPage: React.FC = () => {
     const fetchRewards = async () => {
         setLoading(true);
         try {
-            const { data } = await axios.get(`${API_URL}/admin`);
+            const { data } = await apiClient.get(`${API_URL}/admin`);
             setRewards(data.reverse());
             setError(null);
         } catch (err: any) {
@@ -71,7 +71,7 @@ const AdminRewardsPage: React.FC = () => {
         if (!itemToDelete) return;
 
         try {
-            await axios.delete(`${API_URL}/${itemToDelete.id}/admin`);
+            await apiClient.delete(`${API_URL}/${itemToDelete.id}/admin`);
             setRewards(rewards.filter(r => r.id !== itemToDelete.id));
             showStatus(`Recompensa "${itemToDelete.name}" eliminada.`, 'success');
         } catch (err: any) {
@@ -89,7 +89,7 @@ const AdminRewardsPage: React.FC = () => {
     const handleToggleActive = async (id: string, currentStatus: boolean, name: string) => {
         const newStatus = !currentStatus;
         try {
-            const { data } = await axios.put<Reward>(`${API_URL}/${id}/admin`, { isActive: newStatus });
+            const { data } = await apiClient.put<Reward>(`${API_URL}/${id}/admin`, { isActive: newStatus });
 
             setRewards(prevRewards => prevRewards.map(r => r.id === id ? data : r));
             showStatus(`Recompensa "${name}" cambiada a: ${newStatus ? 'ACTIVA' : 'INACTIVA'}.`, 'success');
@@ -414,7 +414,7 @@ const RewardModal: React.FC<RewardModalProps> = ({ reward, show, handleClose, fe
         const method = isEditing ? 'PUT' : 'POST';
 
         try {
-            await axios({ method, url, data: formData });
+            await apiClient({ method, url, data: formData });
 
             fetchRewards();
             handleClose();

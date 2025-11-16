@@ -10,12 +10,23 @@ import { API_ENDPOINTS } from './api.config';
  */
 
 export const AdminOrderService = {
+    getAuthConfig() {
+        try {
+            const raw = localStorage.getItem('user');
+            if (!raw) return {};
+            const parsed = JSON.parse(raw);
+            if (!parsed?.token) return {};
+            return { headers: { Authorization: `Bearer ${parsed.token}` } };
+        } catch (e) {
+            return {};
+        }
+    },
     /**
      * Obtiene todas las órdenes
      */
     async fetchOrders(): Promise<Order[]> {
         try {
-            const { data } = await axios.get(API_ENDPOINTS.ORDERS);
+            const { data } = await axios.get(API_ENDPOINTS.ORDERS, AdminOrderService.getAuthConfig());
             return Array.isArray(data) ? data.reverse() : [];
         } catch (error) {
             throw new Error('Error al cargar las órdenes. Asegúrate de que el Backend esté corriendo.');
@@ -27,7 +38,7 @@ export const AdminOrderService = {
      */
     async fetchUsers(): Promise<User[]> {
         try {
-            const { data } = await axios.get(API_ENDPOINTS.USERS);
+            const { data } = await axios.get(API_ENDPOINTS.USERS, AdminOrderService.getAuthConfig());
             return Array.isArray(data) ? data : [];
         } catch (error) {
             throw new Error('Error al cargar los usuarios.');
@@ -40,8 +51,8 @@ export const AdminOrderService = {
     async fetchOrdersAndUsers(): Promise<{ orders: Order[]; users: User[] }> {
         try {
             const [ordersRes, usersRes] = await Promise.all([
-                axios.get(API_ENDPOINTS.ORDERS),
-                axios.get(API_ENDPOINTS.USERS),
+                axios.get(API_ENDPOINTS.ORDERS, AdminOrderService.getAuthConfig()),
+                axios.get(API_ENDPOINTS.USERS, AdminOrderService.getAuthConfig()),
             ]);
 
             return {
@@ -58,7 +69,7 @@ export const AdminOrderService = {
      */
     async updateOrderStatus(orderId: string, payload: OrderUpdatePayload): Promise<Order> {
         try {
-            const { data } = await axios.put(`${API_ENDPOINTS.ORDERS}/${orderId}/status`, payload);
+            const { data } = await axios.put(`${API_ENDPOINTS.ORDERS}/${orderId}/status`, payload, AdminOrderService.getAuthConfig());
             return data;
         } catch (error) {
             throw new Error('Fallo al actualizar el estado de la orden.');

@@ -1,34 +1,54 @@
-import { Request, Response, NextFunction } from 'express';
-import * as jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-const SECRET = process.env.JWT_SECRET || 'dev-secret';
+const SECRET = process.env.JWT_SECRET || "dev-secret";
 
 export interface AuthRequest extends Request {
-  user?: { id: string; role?: string };
+  user?: {
+    id: string;
+    role: string;
+  };
 }
 
-export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
-  const auth = req.headers.authorization as string | undefined;
-  if (!auth || !auth.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'No autorizado: token faltante' });
+// -------------------------------------------
+// MIDDLEWARE PARA VERIFICAR JWT
+// -------------------------------------------
+export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+
+  // No viene header Authorization
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "No autorizado. Token faltante." });
   }
 
-  const token = auth.split(' ')[1];
+  const token = authHeader.split(" ")[1];
+
   try {
-    const payload = jwt.verify(token, SECRET) as any;
-    req.user = { id: payload.sub, role: payload.role };
-    next();
-  } catch (err) {
-    return res.status(401).json({ message: 'Token inválido o expirado' });
-  }
-}
+    const decoded = jwt.verify(token, SECRET) as { sub: string; role: string };
 
-export function isAdmin(req: AuthRequest, res: Response, next: NextFunction) {
+    // Guardamos usuario en req.user
+    req.user = {
+      id: decoded.sub,
+      role: decoded.role,
+    };
+
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Token inválido o expirado." });
+  }
+};
+
+// -------------------------------------------
+// MIDDLEWARE PARA RESTRINGIR SOLO ADMIN
+// -------------------------------------------
+export const isAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
   if (!req.user) {
-    return res.status(401).json({ message: 'No autorizado' });
+    return res.status(401).json({ message: "No autorizado." });
   }
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Acceso prohibido: se requiere rol admin' });
+
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Acceso denegado. Requiere rol admin." });
   }
+
   next();
-}
+};
