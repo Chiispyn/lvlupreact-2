@@ -1,22 +1,22 @@
-// level-up-gaming-frontend/src/pages/AdminProductsPage.tsx (CÓDIGO FINAL CORREGIDO)
+// level-up-gaming-frontend/src/pages/AdminProductsPage.tsx
 
 import React, { useState, useEffect, FormEvent } from 'react';
-import { Container, Table, Alert, Spinner, Badge, Button, Modal, Row, Col, Form, Card, ButtonGroup } from 'react-bootstrap';
+import { 
+    Container, Table, Alert, Spinner, Badge, Button, Modal, Row, Col, 
+    Form, Card, ButtonGroup 
+} from 'react-bootstrap';
 import { Edit, ArrowLeft, PlusCircle, AlertTriangle, ToggleLeft, ToggleRight } from 'react-feather';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { Product } from '../types/Product';
 
 import AdminLayout from '../layouts/AdminLayout'; 
+import { Product, ProductPayload, StatusMessage } from '../types/Product';
+import adminProductService from '../services/adminProductService';
 
-// ------------------ CONSTANTES -------------------
+
+// ------------------ FORMATO -------------------
 const CLP_FORMATTER = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 });
 const formatClp = (amount: number) => CLP_FORMATTER.format(amount);
 
-const API_URL = '/api/products';
-const CATEGORIES = ['Consolas', 'Juegos', 'Accesorios', 'Laptops', 'Computadores', 'Juegos de Mesa'];
-const MAX_STOCK = 1000;
-const MAX_PRICE_CLP = 10000000;
 
 // ----------------------------------------------------
 // PÁGINA PRINCIPAL DE ADMINISTRACIÓN DE PRODUCTOS
@@ -28,23 +28,20 @@ const AdminProductsPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [statusMessage, setStatusMessage] = useState<{ msg: string, type: 'success' | 'danger' } | null>(null);
+    const [statusMessage, setStatusMessage] = useState<StatusMessage | null>(null);
 
-    // 🚨 NUEVO: Estados para el modal de confirmación de activar/desactivar
     const [showToggleActiveModal, setShowToggleActiveModal] = useState(false);
     const [itemToToggle, setItemToToggle] = useState<{ id: string, name: string, isActive: boolean } | null>(null);
 
-    // 🚨 NUEVO: Estados para búsqueda y ordenamiento
     const [searchTerm, setSearchTerm] = useState('');
     const [stockSortOrder, setStockSortOrder] = useState<'asc' | 'desc' | ''>('');
     
-    // 🚨 ELIMINADO: Ya no necesitamos estados para el modal de borrado.
-    const fetchProducts = async () => {
+    // Función de Servicio Refactorizada
+    const loadProducts = async () => {
         setLoading(true);
         try {
-            // 🚨 CORRECCIÓN: Llamamos a la ruta principal pero con un parámetro para incluir inactivos.
-            const { data } = await axios.get(`${API_URL}?includeInactive=true&_=${new Date().getTime()}`);
-            setProducts(data.reverse());
+            const fetchedProducts = await adminProductService.fetchProducts();
+            setProducts(fetchedProducts);
             setError(null);
         } catch (err) {
             setError('No se pudo cargar la lista. Asegúrate de que el Backend esté corriendo.');
@@ -54,7 +51,7 @@ const AdminProductsPage: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchProducts();
+        loadProducts();
     }, []);
 
     const showStatus = (msg: string, type: 'success' | 'danger') => {
@@ -62,25 +59,21 @@ const AdminProductsPage: React.FC = () => {
         setTimeout(() => setStatusMessage(null), 5000);
     };
 
-    // 🚨 ELIMINADO: La función handleDelete y confirmDelete ya no son necesarias.
-    // La lógica ahora está centralizada en handleToggleActive.
-
-    // 🚨 CAMBIO: Esta función ahora abre el modal de confirmación
+    // Función que abre el modal de confirmación
     const confirmToggleActive = (id: string, currentStatus: boolean, name: string) => {
         setItemToToggle({ id, name, isActive: currentStatus });
         setShowToggleActiveModal(true);
     };
 
-    // 🚨 NUEVO: Esta función ejecuta la acción después de la confirmación
+    // Función de Servicio Refactorizada: ejecuta la acción después de la confirmación
     const executeToggleActive = async () => {
         if (!itemToToggle) return;
 
         const newStatus = !itemToToggle.isActive;
         try {
-            // 🚨 CORRECCIÓN: Usamos el endpoint PUT /:id que ya existe para activar/desactivar.
-            const { data } = await axios.put<Product>(`${API_URL}/${itemToToggle.id}`, { isActive: newStatus });
+            const updatedProduct = await adminProductService.toggleProductActiveStatus(itemToToggle.id, newStatus);
 
-            setProducts(prevProducts => prevProducts.map(p => p.id === itemToToggle.id ? data : p));
+            setProducts(prevProducts => prevProducts.map(p => p.id === itemToToggle.id ? updatedProduct : p));
             showStatus(`Producto "${itemToToggle.name}" cambiado a: ${newStatus ? 'ACTIVO' : 'INACTIVO'}.`, 'success');
 
         } catch (err) {
@@ -91,18 +84,16 @@ const AdminProductsPage: React.FC = () => {
         }
     };
 
-    // 🚨 NUEVO: Lógica para filtrar y ordenar productos
+    // Lógica para filtrar y ordenar productos
     const filteredAndSortedProducts = React.useMemo(() => {
         let filtered = [...products];
 
-        // 1. Filtrar por término de búsqueda (nombre)
         if (searchTerm) {
             filtered = filtered.filter(product =>
                 product.name.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
-        // 2. Ordenar por stock
         if (stockSortOrder) {
             filtered.sort((a, b) => {
                 if (stockSortOrder === 'asc') {
@@ -137,7 +128,7 @@ const AdminProductsPage: React.FC = () => {
                 </Button>
             </div>
 
-            {/* 🚨 NUEVO: Fila de filtros (Buscador y Ordenamiento) */}
+            {/* Fila de filtros (Buscador y Ordenamiento) */}
             <Row className="mb-4 align-items-center">
                 <Col md={5}>
                     <Form.Control
@@ -170,7 +161,7 @@ const AdminProductsPage: React.FC = () => {
 
             {/* TABLA ESCRITORIO (d-none d-md-block) */}
             <div className="table-responsive d-none d-md-block"> 
-                <Table striped bordered hover  className="table-dark"style={{ backgroundColor: '#111', color: 'white' }}>
+                <Table striped bordered hover className="table-dark"style={{ backgroundColor: '#111', color: 'white' }}>
                     <thead>
                         <tr>
                             <th>Nombre</th>
@@ -189,13 +180,11 @@ const AdminProductsPage: React.FC = () => {
                                 <td>{formatClp(product.price)}</td>
                                 <td><Badge bg={product.countInStock > 5 ? 'success' : product.countInStock > 0 ? 'warning' : 'danger'}>{product.countInStock}</Badge></td>
                                 <td><Badge bg="info">{product.category}</Badge></td>
-                                {/* 🚨 CAMBIO: Ahora solo muestra un Badge de estado */}
                                 <td><Badge bg={product.isActive ? 'success' : 'secondary'}>{product.isActive ? 'Activo' : 'Inactivo'}</Badge></td>
                                 <td>
                                     <Button variant="info" size="sm" className="me-2" onClick={() => setSelectedProduct(product)}>
                                         <Edit size={14} />
                                     </Button>
-                                    {/* 🚨 CAMBIO: El botón de basura se reemplaza por un toggle de activar/desactivar */}
                                     <Button 
                                         variant={product.isActive ? 'warning' : 'success'} 
                                         size="sm" onClick={() => confirmToggleActive(product.id, product.isActive, product.name)} 
@@ -230,7 +219,6 @@ const AdminProductsPage: React.FC = () => {
                                     <Button variant="info" size="sm" onClick={() => setSelectedProduct(product)}>
                                         <Edit size={14} className="me-1"/> Editar
                                     </Button>
-                                    {/* 🚨 CAMBIO: El botón ahora es un toggle claro */}
                                     <Button variant={product.isActive ? 'warning' : 'success'} size="sm" onClick={() => confirmToggleActive(product.id, product.isActive, product.name)}>
                                         {product.isActive ? 'Desactivar' : 'Activar'}
                                     </Button>
@@ -246,11 +234,11 @@ const AdminProductsPage: React.FC = () => {
                 show={showCreateModal || !!selectedProduct}
                 handleClose={() => { setSelectedProduct(null); setShowCreateModal(false); }}
                 currentProduct={selectedProduct}
-                fetchProducts={fetchProducts}
+                fetchProducts={loadProducts}
                 showStatus={showStatus}
             />
 
-            {/* 🚨 NUEVO: Modal de confirmación para activar/desactivar */}
+            {/* Modal de confirmación para activar/desactivar */}
             <ConfirmToggleActiveModal
                 show={showToggleActiveModal}
                 handleClose={() => setShowToggleActiveModal(false)}
@@ -258,8 +246,6 @@ const AdminProductsPage: React.FC = () => {
                 itemName={itemToToggle?.name || 'este producto'}
                 isActivating={!itemToToggle?.isActive}
             />
-
-            {/* 🚨 ELIMINADO: El modal de confirmación de borrado ya no es necesario */}
         </AdminLayout>
     );
 };
@@ -267,7 +253,7 @@ const AdminProductsPage: React.FC = () => {
 export default AdminProductsPage;
 
 // ----------------------------------------------------
-// 🚨 NUEVO: MODAL DE CONFIRMACIÓN PARA ACTIVAR/DESACTIVAR
+// MODAL DE CONFIRMACIÓN PARA ACTIVAR/DESACTIVAR
 // ----------------------------------------------------
 
 interface ConfirmToggleActiveModalProps {
@@ -299,7 +285,7 @@ const ConfirmToggleActiveModal: React.FC<ConfirmToggleActiveModalProps> = ({ sho
 );
 
 // ----------------------------------------------------
-// PRODUCT MODAL
+// PRODUCT MODAL (Corregido: usa AdminProductService.CONSTANTE)
 // ----------------------------------------------------
 
 interface ProductModalProps { 
@@ -313,13 +299,13 @@ interface ProductModalProps {
 const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentProduct, fetchProducts, showStatus }) => {
     
     const isEditing = !!currentProduct;
-
-    // 🚨 CORRECCIÓN: Inicializamos el estado con valores por defecto para evitar el bug de 'isActive' undefined.
-    const [formData, setFormData] = useState<Partial<Product>>({ isActive: true });
-
+    const [formData, setFormData] = useState<ProductPayload>({ isActive: true }); 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Las constantes del servicio (CATEGORIES, MAX_STOCK, MAX_PRICE_CLP) son accesibles 
+    // directamente como AdminProductService.CONSTANTE
 
     useEffect(() => {
         if (currentProduct) {
@@ -332,22 +318,21 @@ const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentP
                 price: 0,
                 imageUrl: '',
                 specifications: '',
-                category: 'Consolas',
+                category: adminProductService.CATEGORIES[0], // CORREGIDO
                 countInStock: 0,
                 isTopSelling: false,
                 rating: 0,
                 numReviews: 0,
-                isActive: true, // Por defecto, los nuevos productos están activos
+                isActive: true, 
             });
             setPreviewUrl(null);
         }
         setError(null);
-    }, [currentProduct, show]);
+    }, [currentProduct, show]); 
 
     const updateFormData = (e: React.ChangeEvent<any>) => {
         const { name, value, type } = e.target;
         
-        // 🚨 CORRECCIÓN: Manejo de checkboxes y switches
         if (type === 'checkbox' || type === 'switch') {
             setFormData(prev => ({ ...prev, [name]: e.target.checked }));
             return;
@@ -355,8 +340,10 @@ const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentP
         
         if (name === 'price' || name === 'countInStock') {
             const intValue = parseInt(value);
-            if (name === 'countInStock' && intValue > MAX_STOCK) return;
-            if (name === 'price' && intValue > MAX_PRICE_CLP) return;
+            // CORREGIDO: Usamos adminProductService.MAX_STOCK
+            if (name === 'countInStock' && intValue > adminProductService.MAX_STOCK) return; 
+            // CORREGIDO: Usamos adminProductService.MAX_PRICE_CLP
+            if (name === 'price' && intValue > adminProductService.MAX_PRICE_CLP) return;
             setFormData(prev => ({ ...prev, [name]: isNaN(intValue) ? 0 : intValue }));
             return; 
         }
@@ -394,14 +381,15 @@ const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentP
         const price = formData.price ?? 0;
         const stock = formData.countInStock ?? 0;
 
-        if (price < 1 || price > MAX_PRICE_CLP || isNaN(price) || !Number.isInteger(price)) {
-            setError(`El precio debe ser un número entero positivo, máximo ${formatClp(MAX_PRICE_CLP)}.`);
+        // Validaciones:
+        if (price < 1 || price > adminProductService.MAX_PRICE_CLP || isNaN(price) || !Number.isInteger(price)) {
+            setError(`El precio debe ser un número entero positivo, máximo ${formatClp(adminProductService.MAX_PRICE_CLP)}.`);
             setLoading(false);
             return;
         }
 
-        if (stock < 0 || stock > MAX_STOCK || isNaN(stock) || !Number.isInteger(stock)) {
-            setError(`El stock debe ser un número entero no negativo, máximo ${MAX_STOCK}.`);
+        if (stock < 0 || stock > adminProductService.MAX_STOCK || isNaN(stock) || !Number.isInteger(stock)) {
+            setError(`El stock debe ser un número entero no negativo, máximo ${adminProductService.MAX_STOCK}.`);
             setLoading(false);
             return;
         }
@@ -412,13 +400,12 @@ const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentP
             return;
         }
 
-        const payload = { ...formData };
-        // 🚨 CORRECCIÓN: Usamos los endpoints POST / y PUT /:id que ya existen.
-        const url = isEditing ? `${API_URL}/${currentProduct!.id}` : API_URL;
-        const method = isEditing ? 'PUT' : 'POST';
-
         try {
-            await axios({ method, url, data: payload });
+            if (isEditing) {
+                await adminProductService.updateProduct(currentProduct!.id, formData);
+            } else {
+                await adminProductService.createProduct(formData);
+            }
 
             fetchProducts();
             handleClose();
@@ -456,7 +443,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentP
                                 <Form.Label>Categoría</Form.Label>
                                 <Form.Select name="category" value={formData.category || ''} onChange={updateFormData} required style={{ backgroundColor: '#333', color: 'white' }}>
                                     <option value="">Seleccione una categoría</option>
-                                    {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                    {/* CORREGIDO: Uso directo del alias de servicio */}
+                                    {adminProductService.CATEGORIES.map((cat: any) => <option key={cat} value={cat}>{cat}</option>)}
                                 </Form.Select>
                             </Form.Group>
                         </Col>
@@ -464,7 +452,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentP
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label>Stock Disponible</Form.Label>
-                                <Form.Control type="number" name="countInStock" value={formData.countInStock ?? 0} onChange={updateFormData} min="0" max={MAX_STOCK} style={{ backgroundColor: '#333', color: 'white' }} />
+                                {/* CORREGIDO: Uso directo del alias de servicio */}
+                                <Form.Control type="number" name="countInStock" value={formData.countInStock ?? 0} onChange={updateFormData} min="0" max={adminProductService.MAX_STOCK} style={{ backgroundColor: '#333', color: 'white' }} />
                             </Form.Group>
                         </Col>
                     </Row>
@@ -483,7 +472,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentP
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label>Precio (CLP)</Form.Label>
-                                <Form.Control type="number" name="price" value={formData.price ?? 0} onChange={updateFormData} min="1" max={MAX_PRICE_CLP} style={{ backgroundColor: '#333', color: 'white' }} />
+                                {/* CORREGIDO: Uso directo del alias de servicio */}
+                                <Form.Control type="number" name="price" value={formData.price ?? 0} onChange={updateFormData} min="1" max={adminProductService.MAX_PRICE_CLP} style={{ backgroundColor: '#333', color: 'white' }} />
                             </Form.Group>
                         </Col>
 
@@ -494,7 +484,6 @@ const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentP
                                 <Form.Text className="text-muted">Si está desactivado, no será visible para los clientes.</Form.Text>
                             </Form.Group>
                         </Col>
-
 
                         <Col md={6}>
                             <Form.Group className="mb-3">

@@ -4,6 +4,11 @@ import { type Request, type Response } from 'express';
 import { type User } from '../data/userData';
 import { v4 as uuidv4 } from 'uuid';
 import { readFromDb, writeToDb } from '../utils/dbUtils';
+import bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
+
+const SECRET = process.env.JWT_SECRET || 'dev-secret';
+const SALT_ROUNDS = 10;
 
 // --- FUNCIONES AUXILIARES ---
 const generateReferralCode = (name: string) => {
@@ -15,23 +20,35 @@ const generateReferralCode = (name: string) => {
 // ----------------------------------------------------
 // LÓGICA DE AUTENTICACIÓN
 // ----------------------------------------------------
-const authUser = (req: Request, res: Response) => {
+const authUser = async (req: Request, res: Response) => {
     const { loginIdentifier, password } = req.body;
     const users = readFromDb<User>('users');
     const user = users.find(
         u => u.email === loginIdentifier || u.name === loginIdentifier
     );
-    
-    if (user && user.password === password && user.isActive) {
-        res.json(user);
-        return;
+
+    if (!user) {
+        return res.status(401).json({ message: 'Credenciales inválidas o usuario no encontrado.' });
     }
-    
-    if (user && !user.isActive) {
+
+    if (!user.isActive) {
         return res.status(403).json({ message: 'Su cuenta ha sido desactivada. Contacte a soporte.' });
     }
 
-    res.status(401).json({ message: 'Credenciales inválidas o usuario no encontrado.' });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+        return res.status(401).json({ message: 'Credenciales inválidas o usuario no encontrado.' });
+    }
+
+    // Issue JWT
+    const token = jwt.sign({ sub: user.id, role: user.role }, SECRET, { expiresIn: '1h' });
+
+    // Return user info without password and with token
+    const safeUser = { ...user } as any;
+    delete safeUser.password;
+    safeUser.token = token;
+
+    res.json(safeUser);
 };
 
 // ----------------------------------------------------
@@ -44,7 +61,7 @@ const registerUser = (req: Request, res: Response) => {
     if (users.some(u => u.email === email)) {
         return res.status(400).json({ message: 'El correo ya está registrado.' });
     }
-    
+
     const hasDuocDiscount = email.toLowerCase().endsWith('@duoc.cl') || email.toLowerCase().endsWith('@duocuc.cl');
     
     let startingPoints = 100;
@@ -62,24 +79,32 @@ const registerUser = (req: Request, res: Response) => {
         return res.status(400).json({ message: 'Faltan datos de dirección para el registro.' });
     }
 
+    const hashed = await bcrypt.hash(password, SALT_ROUNDS);
+
     const newUser: User = {
-        id: uuidv4(), name, email, password, 
-        rut, age: parseInt(age), role: 'customer', token: `MOCK_CUSTOMER_TOKEN_${uuidv4().slice(0, 8)}`,
+        id: uuidv4(), name, email, password: hashed, 
+        rut, age: parseInt(age), role: 'customer', token: '',
         hasDuocDiscount, points: startingPoints, referralCode,
         address, 
         isActive: true,
     };
 
+    // issue JWT for the created user
+    const token = jwt.sign({ sub: newUser.id, role: newUser.role }, SECRET, { expiresIn: '1h' });
+    newUser.token = token;
+
     users.push(newUser);
     writeToDb<User>('users', users);
 
-    res.status(201).json(newUser);
+    const safeUser = { ...newUser } as any;
+    delete safeUser.password;
+    res.status(201).json(safeUser);
 };
 
 // ----------------------------------------------------
 // LÓGICA DE EDICIÓN DE PERFIL DEL CLIENTE
 // ----------------------------------------------------
-const updateUserProfile = (req: Request, res: Response) => {
+const updateUserProfile = async (req: Request, res: Response) => {
     const { userId } = req.params;
     const { name, age, address, newPassword } = req.body;
     const users = readFromDb<User>('users');
@@ -87,7 +112,10 @@ const updateUserProfile = (req: Request, res: Response) => {
 
     if (userIndex !== -1) {
         const user = users[userIndex];
-        const updatedPassword = newPassword && newPassword.length >= 6 ? newPassword : user.password;
+        let updatedPassword = user.password;
+        if (newPassword && newPassword.length >= 6) {
+            updatedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+        }
 
         users[userIndex] = {
             ...user,
@@ -121,7 +149,7 @@ const getUsers = (req: Request, res: Response) => {
     res.json(users);
 };
 
-const createUser = (req: Request, res: Response) => {
+const createUser = async (req: Request, res: Response) => {
     const { name, email, password, role, rut, age, address } = req.body;
     const users = readFromDb<User>('users');
 
@@ -129,19 +157,27 @@ const createUser = (req: Request, res: Response) => {
         return res.status(400).json({ message: 'El correo ya está registrado.' });
     }
 
+    const hashed = await bcrypt.hash(password, SALT_ROUNDS);
+
     const newUser: User = {
-        id: uuidv4(), name, email, password, 
+        id: uuidv4(), name, email, password: hashed, 
         rut: rut || 'NO ASIGNADO', age: parseInt(age) || 0, 
-        role: role, token: `MOCK_ADMIN_CREATED_${uuidv4().slice(0, 8)}`,
+        role: role, token: '',
         hasDuocDiscount: email.toLowerCase().endsWith('@duoc.cl') || email.toLowerCase().endsWith('@duocuc.cl'), 
         points: 0, referralCode: generateReferralCode(name), 
         address: address || { street: 'N/A', city: 'N/A', region: 'N/A', zipCode: 'N/A' }, 
         isActive: true,
     };
 
+    // issue JWT for the created user
+    const token = jwt.sign({ sub: newUser.id, role: newUser.role }, SECRET, { expiresIn: '1h' });
+    newUser.token = token;
+
     users.push(newUser);
     writeToDb<User>('users', users);
-    res.status(201).json(newUser);
+    const safeUser = { ...newUser } as any;
+    delete safeUser.password;
+    res.status(201).json(safeUser);
 };
 
 const updateUserByAdmin = (req: Request, res: Response) => {
@@ -155,7 +191,11 @@ const updateUserByAdmin = (req: Request, res: Response) => {
             return res.status(403).json({ message: 'No se puede cambiar el rol del administrador principal.' });
         }
         
-        const updatedPassword = newPassword && newPassword.length >= 6 ? newPassword : users[userIndex].password;
+
+        let updatedPassword = users[userIndex].password;
+        if (newPassword && newPassword.length >= 6) {
+            updatedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+        }
 
         users[userIndex] = {
             ...users[userIndex],

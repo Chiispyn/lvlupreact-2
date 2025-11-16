@@ -319,5 +319,44 @@
         "isPaid": true,
         "status": "Procesando",
         "createdAt": "2025-11-15T20:27:08.161Z"
+    },
+    {
+        "id": "0ffdc0dc-4a97-48e5-9dd1-f98ea9de2447",
+        "userId": "u1",
+        "items": [
+            {
+                "product": {
+                    "id": "JM002",
+                    "name": "Carcassonne",
+                    "description": "Un juego de colocación de fichas donde los jugadores construyen el paisaje alrededor de la fortaleza medieval. Es ideal para 2-5 jugadores.",
+                    "price": 24990,
+                    "imageUrl": "/images/juego-carcassonne.png",
+                    "rating": 4.5,
+                    "numReviews": 89,
+                    "isTopSelling": false,
+                    "countInStock": 15,
+                    "category": "Juegos de Mesa",
+                    "specifications": "{\"Jugadores\": \"2-5\", \"Tiempo\": \"35 min\", \"Tipo\": \"Colocación de Fichas\"}",
+                    "isActive": true,
+                    "reviews": []
+                },
+                "quantity": 1,
+                "isRedeemed": false,
+                "pointsCost": 0
+            }
+        ],
+        "shippingAddress": {
+            "street": "Paicaví 3280",
+            "city": "Concepción",
+            "region": "Biobío",
+            "zipCode": "4030000",
+            "notes": ""
+        },
+        "paymentMethod": "webpay",
+        "totalPrice": 29992,
+        "shippingPrice": 10000,
+        "isPaid": true,
+        "status": "Entregado",
+        "createdAt": "2025-11-16T10:55:01.012Z"
     }
 ]

@@ -7,36 +7,41 @@ import {
 } from 'react-bootstrap';
 import { Edit, ArrowLeft } from 'react-feather';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { User as AuthUser } from '../context/AuthContext'; // 🚨 NUEVO: Importar tipo de usuario
 
 import AdminLayout from '../layouts/AdminLayout';
+import AdminOrderService from '../services/AdminOrderService';
+import { Order, OrderStatus } from '../types/Order';
+import { User } from '../types/User';
+import { StatusMessage } from '../types/StatusMessage';
+import { formatClp, formatDate, formatDateTime } from '../utils/formatters';
+import { ORDER_STATUS_OPTIONS } from '../utils/constants';
 
-// -----------------------------
-// Interfaces (coinciden backend)
-// -----------------------------
-interface Order {
-    id: string;
-    userId: string;
-    userRut?: string; // Hacemos el RUT opcional para la transición
-    items: { product: { name: string; price: number }; quantity: number }[];
-    shippingAddress: { street: string; city: string; region: string };
-    totalPrice: number;
-    status: 'Pendiente' | 'Procesando' | 'Enviado' | 'Entregado' | 'Cancelado';
-    createdAt: string;
-}
+// Componente funcional puro para estados
+const StatusSelect: React.FC<{
+    status: OrderStatus;
+    onUpdate: (id: string, status: string) => void;
+    orderId: string;
+}> = ({ status, onUpdate, orderId }) => {
+    const isFinal = status === 'Entregado' || status === 'Cancelado';
+    const currentIndex = ORDER_STATUS_OPTIONS.indexOf(status);
 
-const API_ORDERS_URL = '/api/orders';
-const API_USERS_URL = '/api/users'; // 🚨 NUEVO: URL para obtener usuarios
-
-const CLP_FORMATTER = new Intl.NumberFormat('es-CL', {
-    style: 'currency',
-    currency: 'CLP',
-    minimumFractionDigits: 0
-});
-const formatClp = (amount: number) => CLP_FORMATTER.format(amount);
-
-const STATUS_OPTIONS = ['Pendiente', 'Procesando', 'Enviado', 'Entregado', 'Cancelado'];
+    return (
+        <Form.Select
+            value={status}
+            onChange={(e) => onUpdate(orderId, e.target.value)}
+            disabled={isFinal}
+            style={{
+                backgroundColor: '#333',
+                color: 'white',
+                borderColor: '#555'
+            }}
+        >
+            {ORDER_STATUS_OPTIONS.map((opt, idx) => (
+                <option key={opt} value={opt} disabled={idx < currentIndex}>{opt}</option>
+            ))}
+        </Form.Select>
+    );
+};
 
 // ----------------------------------------------------
 // PÁGINA PRINCIPAL DE ADMINISTRACIÓN DE ÓRDENES
@@ -53,24 +58,20 @@ const AdminOrdersPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState(''); // 🚨 NUEVO: Estado para el término de búsqueda
     const [userMap, setUserMap] = useState<Map<string, string>>(new Map()); // 🚨 NUEVO: Mapa de ID a RUT
 
-    // 🚨 CAMBIO: Ahora obtenemos órdenes y usuarios
+    // 🚨 CAMBIO: Ahora obtenemos órdenes y usuarios usando el servicio
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [ordersRes, usersRes] = await Promise.all([
-                axios.get(API_ORDERS_URL),
-                axios.get(API_USERS_URL)
-            ]);
+            const { orders, users } = await AdminOrderService.fetchOrdersAndUsers();
 
-            const users: AuthUser[] = usersRes.data;
             const newMap = new Map<string, string>();
             users.forEach(user => newMap.set(user.id, user.rut));
             setUserMap(newMap);
 
-            setOrders(ordersRes.data.reverse());
+            setOrders(orders);
             setError(null);
-        } catch {
-            setError('Error al cargar las órdenes. Asegúrate de que el Backend esté corriendo.');
+        } catch (err: any) {
+            setError(err.message || 'Error al cargar las órdenes.');
         } finally {
             setLoading(false);
         }
@@ -85,11 +86,11 @@ const AdminOrdersPage: React.FC = () => {
 
     const handleUpdateStatus = async (orderId: string, newStatus: string) => {
         try {
-            const { data } = await axios.put(`${API_ORDERS_URL}/${orderId}/status`, { status: newStatus });
-            setOrders(orders.map(o => (o.id === orderId ? data : o)));
+            const updatedOrder = await AdminOrderService.updateOrderStatus(orderId, { status: newStatus as OrderStatus });
+            setOrders(orders.map(o => (o.id === orderId ? updatedOrder : o)));
             showStatus(`Estado actualizado a ${newStatus}.`, 'success');
-        } catch {
-            showStatus('Fallo al actualizar el estado.', 'danger');
+        } catch (err: any) {
+            showStatus(err.message || 'Fallo al actualizar el estado.', 'danger');
         }
     };
 
@@ -189,7 +190,7 @@ const AdminOrdersPage: React.FC = () => {
                             <tr key={order.id}>
                                 <td>{order.id.slice(0, 8)}...</td>
                                 <td>{formatClp(order.totalPrice)}</td>
-                                <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                                <td>{formatDate(order.createdAt)}</td>
                                 {/* 🚨 CAMBIO: Mostramos el RUT desde el mapa */}
                                 <td>{userMap.get(order.userId) || 'N/A'}</td>
                                 <td><StatusBadge status={order.status} /></td>
@@ -219,7 +220,7 @@ const AdminOrdersPage: React.FC = () => {
                                 <hr />
                                 <p>Total: <strong>{formatClp(order.totalPrice)}</strong></p>
                                 <p className="text-muted small">RUT Cliente: {userMap.get(order.userId) || 'N/A'}</p>
-                                <p className="text-muted small">Fecha: {new Date(order.createdAt).toLocaleDateString()}</p>
+                                <p className="text-muted small">Fecha: {formatDate(order.createdAt)}</p>
 
                                 <div className="d-grid gap-2">
                                     <Button variant="info" size="sm" onClick={() => setSelectedOrder(order)}>
@@ -263,32 +264,6 @@ const StatusBadge: React.FC<{ status: Order['status'] }> = ({ status }) => {
     return <Badge bg={bg}>{status.toUpperCase()}</Badge>;
 };
 
-const StatusSelect: React.FC<{
-    status: Order['status'];
-    onUpdate: (id: string, status: string) => void;
-    orderId: string;
-}> = ({ status, onUpdate, orderId }) => {
-
-    const isFinal = status === 'Entregado' || status === 'Cancelado';
-
-    return (
-        <Form.Select
-            value={status}
-            onChange={(e) => onUpdate(orderId, e.target.value)}
-            disabled={isFinal}
-            style={{
-                backgroundColor: '#333',
-                color: 'white',
-                borderColor: '#555'
-            }}
-        >
-            {STATUS_OPTIONS.map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
-            ))}
-        </Form.Select>
-    );
-};
-
 interface OrderDetailsModalProps {
     order: Order | null;
     show: boolean;
@@ -306,7 +281,23 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     const [currentStatus, setCurrentStatus] = useState(order.status);
     const [loading, setLoading] = useState(false);
 
+    const originalIndex = ORDER_STATUS_OPTIONS.indexOf(order.status);
+    const isOriginalFinal = order.status === 'Entregado' || order.status === 'Cancelado';
+
     const handleSaveStatus = async () => {
+        // Prevent reverting to previous statuses or changing final statuses
+        const selectedIndex = ORDER_STATUS_OPTIONS.indexOf(currentStatus);
+        if (isOriginalFinal) {
+            // Shouldn't happen due to disabled controls, but guard anyway
+            return;
+        }
+        if (selectedIndex < originalIndex) {
+            // Invalid transition
+            // show a temporary alert inside modal (could be improved to use statusMessage)
+            // For now, just return without saving
+            return;
+        }
+
         setLoading(true);
         try {
             await handleUpdateStatus(order.id, currentStatus);
@@ -334,7 +325,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                                 RUT Cliente: {userRut || 'No disponible'}
                             </ListGroup.Item>
                             <ListGroup.Item style={{ background: 'transparent', color: 'white' }}>
-                                Fecha: {new Date(order.createdAt).toLocaleString()}
+                                Fecha: {formatDateTime(order.createdAt)}
                             </ListGroup.Item>
                             <ListGroup.Item style={{ background: 'transparent', color: 'white' }}>
                                 Total: {formatClp(order.totalPrice)}
@@ -353,12 +344,15 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                             onChange={(e) => setCurrentStatus(e.target.value as Order['status'])}
                             style={{ backgroundColor: '#333', color: 'white' }}
                             className="mb-3"
+                            disabled={isOriginalFinal}
                         >
-                            {STATUS_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
+                            {ORDER_STATUS_OPTIONS.map((opt, idx) => (
+                                <option key={opt} value={opt} disabled={idx < originalIndex}>{opt}</option>
+                            ))}
                         </Form.Select>
 
                         <Button variant="success" className="w-100"
-                            disabled={loading}
+                            disabled={loading || isOriginalFinal}
                             onClick={handleSaveStatus}>
                             {loading ? 'Guardando...' : 'Guardar Estado'}
                         </Button>

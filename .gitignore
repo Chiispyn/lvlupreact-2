@@ -1,0 +1,25 @@
+# Node
+node_modules/
+
+# Frontend coverage and reports
+level-up-gaming-frontend/coverage/
+level-up-gaming-frontend/coverage/**
+
+# Generated HTML reports
+html/
+coverage/html/
+
+# Generated assets from coverage/reporting
+assets/
+
+# Vitest / Jest snapshots
+# (Snapshots are not ignored by default — keep them versioned if you want historical snapshots)
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# VSCode
+.vscode/

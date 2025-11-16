@@ -1,23 +1,18 @@
 // level-up-gaming-frontend/src/pages/AdminVideosPage.tsx
 
 import React, { useState, useEffect, FormEvent } from 'react';
-import { Container, Table, Alert, Spinner, Badge, Button, Modal, Row, Col, Form, Card, ButtonGroup } from 'react-bootstrap';
-import { Edit, Trash, ArrowLeft, PlusCircle, Video, Star, AlertTriangle, Check, X } from 'react-feather'; 
-import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { 
+    Container, Table, Alert, Spinner, Badge, Button, Modal, Row, Col, 
+    Form, Card, ButtonGroup 
+} from 'react-bootstrap';
+import { Edit, Trash, PlusCircle, Star, AlertTriangle } from 'react-feather'; 
+// Eliminamos: import axios from 'axios';
 import AdminLayout from '../layouts/AdminLayout'; 
 
-// Interfaces (deben coincidir con el Backend)
-interface Video {
-    id: string;
-    title: string;
-    embedUrl: string; 
-    isFeatured: boolean;
-}
-
-const API_URL = '/api/videos';
-const REWARD_TYPES = ['Producto', 'Descuento', 'Envio'];
-const REWARD_SEASONS = ['Standard', 'Halloween', 'Navidad', 'BlackFriday', 'Verano']; 
+// Importamos tipos y servicio
+import { Video, VideoFormData } from '../types/Video';
+import { StatusMessage } from '../types/StatusMessage';
+import AdminVideoService from '../services/AdminVideoService';
 
 
 const AdminVideosPage: React.FC = () => {
@@ -26,22 +21,23 @@ const AdminVideosPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedVideo, setSelectedVideo] = useState<Video | null>(null); 
     const [showCreateModal, setShowCreateModal] = useState(false); 
-    const [statusMessage, setStatusMessage] = useState<{ msg: string, type: 'success' | 'danger' } | null>(null);
+    const [statusMessage, setStatusMessage] = useState<StatusMessage | null>(null);
     
     // ESTADOS PARA EL MODAL DE ELIMINACIÓN
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<{ id: string, name: string } | null>(null);
 
-    // 🚨 NUEVO: Estados para búsqueda y filtros
+    // Estados para búsqueda y filtros
     const [searchTerm, setSearchTerm] = useState('');
     const [featuredFilter, setFeaturedFilter] = useState<'featured' | 'not_featured' | ''>('');
 
 
+    // Función de Servicio Refactorizada
     const fetchVideos = async () => {
         setLoading(true);
         try {
-            const { data } = await axios.get(API_URL); 
-            setVideos(data.reverse()); 
+            const data = await AdminVideoService.fetchVideos();
+            setVideos(data);
             setError(null);
         } catch (err: any) {
             setError('Error al cargar los videos. Asegúrate de que el Backend esté corriendo.');
@@ -65,12 +61,12 @@ const AdminVideosPage: React.FC = () => {
         setShowDeleteModal(true);
     };
 
-    // Función que ejecuta la eliminación (llamada desde el modal)
+    // Función que ejecuta la eliminación - Refactorizada
     const handleDelete = async () => {
         if (!itemToDelete) return;
         
         try {
-            await axios.delete(`${API_URL}/${itemToDelete.id}/admin`); 
+            await AdminVideoService.deleteVideo(itemToDelete.id); 
             setVideos(videos.filter(v => v.id !== itemToDelete.id));
             showStatus(`Video "${itemToDelete.name}" eliminado con éxito.`, 'success');
         } catch (err: any) {
@@ -85,15 +81,14 @@ const AdminVideosPage: React.FC = () => {
         setSelectedVideo(event);
     };
     
-    // FUNCIÓN CRÍTICA: Toggle de Activación Rápida
-    const handleToggleFeatured = async (id: string, currentStatus: boolean, name: string) => {
-        const newStatus = !currentStatus;
+    // FUNCIÓN CRÍTICA: Toggle de Activación Rápida - Refactorizada
+    const handleToggleFeatured = async (id: string, currentStatus: boolean) => {
         try {
-            // Llama al endpoint PUT para cambiar el estado
-            const { data } = await axios.put<Video>(`${API_URL}/${id}/feature`);
+            // Llama a la función de servicio que maneja el PUT
+            const updatedVideo = await AdminVideoService.toggleVideoFeaturedStatus(id);
             
-            // Actualizar el estado localmente con el objeto devuelto por el Backend
-            setVideos(prevVideos => prevVideos.map(v => v.id === id ? data : v));
+            // Actualizar el estado localmente con el objeto devuelto
+            setVideos(prevVideos => prevVideos.map(v => v.id === id ? updatedVideo : v));
 
             showStatus(`Visibilidad en Home cambiada a: ${!currentStatus ? 'Destacado' : 'Normal'}.`, 'success');
 
@@ -102,7 +97,7 @@ const AdminVideosPage: React.FC = () => {
         }
     };
 
-    // 🚨 NUEVO: Lógica para filtrar videos
+    // Lógica para filtrar videos
     const filteredVideos = React.useMemo(() => {
         let filtered = [...videos];
 
@@ -148,7 +143,7 @@ const AdminVideosPage: React.FC = () => {
                 </Button>
             </div>
             
-            {/* 🚨 NUEVO: Fila de filtros */}
+            {/* Fila de filtros */}
             <Row className="mb-4 align-items-center">
                 <Col md={5}>
                     <Form.Control
@@ -196,7 +191,7 @@ const AdminVideosPage: React.FC = () => {
                                 <td style={{ color: 'white' }}>{video.title}</td>
                                 <td><a href={video.embedUrl} target="_blank" rel="noopener noreferrer">Ver Video</a></td>
                                 <td>
-                                    <Button variant={video.isFeatured ? 'success' : 'secondary'} size="sm" onClick={() => handleToggleFeatured(video.id, video.isFeatured, video.title)} title={video.isFeatured ? 'Quitar de Home' : 'Destacar en Home'}>
+                                    <Button variant={video.isFeatured ? 'success' : 'secondary'} size="sm" onClick={() => handleToggleFeatured(video.id, video.isFeatured)} title={video.isFeatured ? 'Quitar de Home' : 'Destacar en Home'}>
                                         <Star size={14} fill={video.isFeatured ? 'black' : 'none'} stroke={video.isFeatured ? 'black' : 'white'}/>
                                     </Button>
                                 </td>
@@ -210,7 +205,7 @@ const AdminVideosPage: React.FC = () => {
                 </Table>
             </div>
 
-            {/* 🚨 VISTA 2: TARJETAS APILADAS (Móvil) */}
+            {/* VISTA 2: TARJETAS APILADAS (Móvil) */}
             <Row className="d-block d-md-none g-3">
                 {filteredVideos.map((video) => (
                     <Col xs={12} key={video.id}>
@@ -223,12 +218,13 @@ const AdminVideosPage: React.FC = () => {
                                 <hr style={{ borderColor: '#444' }}/>
                                 
                                 <div className="ratio ratio-16x9 mb-3">
+                                    {/* Mantenemos el iframe para la vista previa móvil */}
                                     <iframe src={video.embedUrl} style={{ border: 0 }} allowFullScreen title={`Video de ${video.title}`}></iframe>
                                 </div>
                                 
                                 <div className="d-grid gap-2">
                                     <Button variant="info" size="sm" onClick={() => handleEdit(video)}><Edit size={14} className="me-1"/> Editar</Button>
-                                    <Button variant={video.isFeatured ? 'danger' : 'success'} size="sm" onClick={() => handleToggleFeatured(video.id, video.isFeatured, video.title)}>
+                                    <Button variant={video.isFeatured ? 'danger' : 'success'} size="sm" onClick={() => handleToggleFeatured(video.id, video.isFeatured)}>
                                         {video.isFeatured ? 'Quitar de Home' : 'Destacar en Home'}
                                     </Button>
                                     <Button variant="outline-danger" size="sm" onClick={() => confirmDelete(video.id, video.title)}><Trash size={14} className="me-1"/> Eliminar</Button>
@@ -264,9 +260,8 @@ export default AdminVideosPage;
 
 
 // ----------------------------------------------------
-// COMPONENTES MODAL AUXILIARES
+// COMPONENTES MODAL AUXILIARES (REFRACTORIZADOS)
 // ----------------------------------------------------
-// (Implementamos los modales auxiliares para que el archivo compile)
 
 interface ConfirmDeleteModalProps { show: boolean; handleClose: () => void; handleDelete: () => void; itemName: string; }
 
@@ -284,7 +279,9 @@ interface VideoModalProps { video: Video | null; show: boolean; handleClose: () 
 
 const VideoModal: React.FC<VideoModalProps> = ({ video, show, handleClose, fetchVideos, showStatus }) => {
     const isEditing = !!video;
-    const [formData, setFormData] = useState({
+    
+    // Usamos el tipo VideoFormData para el estado
+    const [formData, setFormData] = useState<VideoFormData>({
         title: video?.title || '',
         embedUrl: video?.embedUrl || 'https://www.youtube.com/embed/VIDEO_ID_AQUÍ',
         isFeatured: video?.isFeatured || false,
@@ -309,28 +306,30 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, show, handleClose, fetch
         }));
     };
 
+    // Lógica de Servicio Refactorizada
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
-
-        const url = isEditing ? `${API_URL}/${video!.id}/admin` : `${API_URL}/admin`;
-        const method = isEditing ? 'PUT' : 'POST';
         
-        if (!formData.embedUrl.includes('youtube.com/embed/')) {
+        // Validación de URL
+        if (!formData.embedUrl?.includes('youtube.com/embed/')) {
             setError('La URL de incrustación debe ser el formato /embed/ de YouTube.');
             setLoading(false);
             return;
         }
 
         try {
-            const payload = { ...formData, isFeatured: !!formData.isFeatured };
+            // Aseguramos que los valores booleanos sean correctos en el payload
+            const payload: VideoFormData = { ...formData, isFeatured: !!formData.isFeatured };
 
-            await axios({
-                method: method,
-                url: url,
-                data: payload,
-            });
+            if (isEditing) {
+                // Usamos la función de servicio para actualizar
+                await AdminVideoService.updateVideo(video!.id, payload);
+            } else {
+                // Usamos la función de servicio para crear
+                await AdminVideoService.createVideo(payload);
+            }
             
             fetchVideos();
             handleClose();
@@ -354,14 +353,14 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, show, handleClose, fetch
                 <Form onSubmit={handleSubmit}>
                     <Form.Group className="mb-3">
                         <Form.Label>Título</Form.Label>
-                        <Form.Control type="text" name="title" value={formData.title} onChange={updateFormData} required style={{ backgroundColor: '#333', color: 'white' }}/>
+                        <Form.Control type="text" name="title" value={formData.title || ''} onChange={updateFormData} required style={{ backgroundColor: '#333', color: 'white' }}/>
                     </Form.Group>
                     
                     <Row>
                         <Col md={12} xs={12}>
                             <Form.Group className="mb-3">
                                 <Form.Label>URL iframe (YouTube)</Form.Label>
-                                <Form.Control as="textarea" rows={3} name="embedUrl" value={formData.embedUrl} onChange={updateFormData} required style={{ backgroundColor: '#333', color: 'white' }}/>
+                                <Form.Control as="textarea" rows={3} name="embedUrl" value={formData.embedUrl || ''} onChange={updateFormData} required style={{ backgroundColor: '#333', color: 'white' }}/>
                                 <Form.Text className="text-muted">
                                     Debe ser la URL de incrustación de YouTube (Ej: https://www.youtube.com/embed/...)
                                 </Form.Text>
@@ -374,7 +373,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, show, handleClose, fetch
                             type="checkbox" 
                             label="Destacar en la página de inicio" 
                             name="isFeatured" 
-                            checked={formData.isFeatured}
+                            checked={formData.isFeatured || false}
                             onChange={updateFormData} 
                         />
                     </Form.Group>

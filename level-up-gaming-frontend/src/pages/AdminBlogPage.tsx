@@ -1,4 +1,4 @@
-// level-up-gaming-frontend/src/pages/AdminBlogPage.tsx
+// src/pages/AdminBlogPage.tsx
 
 import React, { useState, useEffect, FormEvent } from 'react';
 import {
@@ -15,22 +15,20 @@ import {
     Card,
     ButtonGroup
 } from 'react-bootstrap';
-    import { Edit, Trash, ArrowLeft, PlusCircle, AlertTriangle } from 'react-feather';
+import { Edit, Trash, ArrowLeft, PlusCircle, AlertTriangle } from 'react-feather';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+// Eliminamos: import axios from 'axios';
 import AdminLayout from '../layouts/AdminLayout';
 
-interface BlogPost {
-    id: string;
-    title: string;
-    excerpt: string;
-    content: string;
-    imageUrl: string;
-    author: string;
-    createdAt: string;
-}
+// Importamos tipos y servicio
+import { BlogPost, PostFormData } from '../types/Blog';
+import { StatusMessage } from '../types/StatusMessage';
+import AdminBlogService from '../services/AdminBlogService';
 
-const API_URL = '/api/blog';
+
+// ----------------------------------------------------
+// PÁGINA PRINCIPAL DE ADMINISTRACIÓN DE BLOG
+// ----------------------------------------------------
 
 const AdminBlogPage: React.FC = () => {
     const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -39,20 +37,22 @@ const AdminBlogPage: React.FC = () => {
     const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
-    const [statusMessage, setStatusMessage] = useState<{ msg: string; type: 'success' | 'danger' } | null>(null);
+    // Usamos el tipo StatusMessage importado
+    const [statusMessage, setStatusMessage] = useState<StatusMessage | null>(null);
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
 
-    // 🚨 NUEVO: Estados para búsqueda y ordenamiento
+    // Estados para búsqueda y ordenamiento
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | ''>('newest');
 
+    // ** Función de Servicio Refactorizada **
     const fetchPosts = async () => {
         setLoading(true);
         try {
-            const { data } = await axios.get(API_URL);
-            setPosts(data.reverse());
+            const data = await AdminBlogService.fetchPosts();
+            setPosts(data);
             setError(null);
         } catch (err) {
             setError("Error al cargar los posts. Verifica el backend.");
@@ -65,6 +65,7 @@ const AdminBlogPage: React.FC = () => {
         fetchPosts();
     }, []);
 
+    // Usamos el tipo StatusMessage importado
     const showStatus = (msg: string, type: 'success' | 'danger') => {
         setStatusMessage({ msg, type });
         setTimeout(() => setStatusMessage(null), 4000);
@@ -75,11 +76,12 @@ const AdminBlogPage: React.FC = () => {
         setShowDeleteModal(true);
     };
 
+    // ** Lógica de Eliminación Refactorizada **
     const handleDelete = async () => {
         if (!itemToDelete) return;
 
         try {
-            await axios.delete(`${API_URL}/${itemToDelete.id}/admin`);
+            await AdminBlogService.deletePost(itemToDelete.id);
             setPosts(posts.filter(post => post.id !== itemToDelete.id));
 
             showStatus(`Artículo "${itemToDelete.name}" eliminado.`, "success");
@@ -95,7 +97,7 @@ const AdminBlogPage: React.FC = () => {
         setSelectedPost(post);
     };
 
-    // 🚨 NUEVO: Lógica para filtrar y ordenar los posts
+    // Lógica para filtrar y ordenar los posts (sin cambios)
     const filteredAndSortedPosts = React.useMemo(() => {
         let filtered = [...posts];
 
@@ -136,7 +138,6 @@ const AdminBlogPage: React.FC = () => {
 
     return (
         <AdminLayout>
-            {/* Estilo para el placeholder del buscador */}
             <style>{`
                 .admin-search-input::placeholder {
                     color: #999;
@@ -158,7 +159,7 @@ const AdminBlogPage: React.FC = () => {
                 </Button>
             </div>
 
-            {/* 🚨 NUEVO: Fila de filtros */}
+            {/* Fila de filtros */}
             <Row className="mb-4 align-items-center">
                 <Col md={5}>
                     <Form.Control
@@ -194,7 +195,7 @@ const AdminBlogPage: React.FC = () => {
                 </Alert>
             )}
 
-            {/* ✅ Vista Escritorio */}
+            {/* Vista Escritorio */}
             <div className="table-responsive d-none d-md-block">
                 <Table
                     striped
@@ -243,7 +244,7 @@ const AdminBlogPage: React.FC = () => {
                 </Table>
             </div>
 
-            {/* ✅ Vista Móvil */}
+            {/* Vista Móvil */}
             <Row className="d-block d-md-none g-3">
                 {filteredAndSortedPosts.map(post => (
                     <Col xs={12} key={post.id}>
@@ -281,7 +282,7 @@ const AdminBlogPage: React.FC = () => {
                 ))}
             </Row>
 
-            {/* ✅ Modal Create/Edit */}
+            {/* Modal Create/Edit */}
             <PostModal
                 post={selectedPost}
                 show={showCreateModal || !!selectedPost}
@@ -293,7 +294,7 @@ const AdminBlogPage: React.FC = () => {
                 showStatus={showStatus}
             />
 
-            {/* ✅ Modal Delete */}
+            {/* Modal Delete */}
             <ConfirmDeleteModal
                 show={showDeleteModal}
                 handleClose={() => setShowDeleteModal(false)}
@@ -307,8 +308,8 @@ const AdminBlogPage: React.FC = () => {
 export default AdminBlogPage;
 
 /* =====================================================================================
-   ✅ MODALES (SIN CAMBIOS — COPIADOS TAL CUAL, SOLO PEGAR)
-   ===================================================================================== */
+    COMPONENTES MODAL AUXILIARES
+    ===================================================================================== */
 
 interface ConfirmDeleteModalProps {
     show: boolean;
@@ -344,10 +345,20 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
     </Modal>
 );
 
-const PostModal: React.FC<any> = ({ post, show, handleClose, fetchPosts, showStatus }) => {
+// Usa las interfaces BlogPost, PostFormData y StatusMessage
+interface PostModalProps {
+    post: BlogPost | null; 
+    show: boolean;
+    handleClose: () => void;
+    fetchPosts: () => void;
+    showStatus: (msg: string, type: 'success' | 'danger') => void;
+}
+
+const PostModal: React.FC<PostModalProps> = ({ post, show, handleClose, fetchPosts, showStatus }) => {
     const isEditing = !!post;
 
-    const [formData, setFormData] = useState({
+    // Usamos el tipo PostFormData
+    const [formData, setFormData] = useState<PostFormData>({
         title: post?.title || "",
         excerpt: post?.excerpt || "",
         content: post?.content || "",
@@ -374,11 +385,12 @@ const PostModal: React.FC<any> = ({ post, show, handleClose, fetchPosts, showSta
                 title: "",
                 excerpt: "",
                 content: "",
-                imageUrl: "https://via.placeholder.com/300x200/000000/FFFFFF?text=IMAGEN+FALTANTE",
+                imageUrl: "", // Inicializamos vacío para permitir carga de archivo
                 author: "Admin"
             });
             setPreviewUrl(null);
         }
+        setError(null);
     }, [post, show]);
 
     const updateFormData = (e: React.ChangeEvent<any>) => {
@@ -396,11 +408,13 @@ const PostModal: React.FC<any> = ({ post, show, handleClose, fetchPosts, showSta
             };
             reader.readAsDataURL(e.target.files[0]);
         } else {
+            // Si no se selecciona archivo, restablecer a la URL original o vacío
             setPreviewUrl(post?.imageUrl || null);
             setFormData(prev => ({ ...prev, imageUrl: post?.imageUrl || "" }));
         }
     };
 
+    // ** Lógica de Submit Refactorizada **
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -412,11 +426,13 @@ const PostModal: React.FC<any> = ({ post, show, handleClose, fetchPosts, showSta
             return;
         }
 
-        const url = isEditing ? `${API_URL}/${post!.id}/admin` : `${API_URL}/admin`;
-        const method = isEditing ? "PUT" : "POST";
-
         try {
-            await axios({ method, url, data: formData });
+            if (isEditing) {
+                await AdminBlogService.updatePost(post!.id, formData);
+            } else {
+                await AdminBlogService.createPost(formData);
+            }
+            
             fetchPosts();
             handleClose();
 
@@ -425,7 +441,7 @@ const PostModal: React.FC<any> = ({ post, show, handleClose, fetchPosts, showSta
                 "success"
             );
         } catch (err: any) {
-            setError(err.response?.data?.message || "Error al guardar el artículo.");
+            setError(err.message || err.response?.data?.message || "Error al guardar el artículo.");
         } finally {
             setLoading(false);
         }
@@ -518,7 +534,8 @@ const PostModal: React.FC<any> = ({ post, show, handleClose, fetchPosts, showSta
                                     name="imageUrl"
                                     value={formData.imageUrl}
                                     onChange={updateFormData}
-                                    disabled={formData.imageUrl.startsWith("data:image")}
+                                    // Deshabilitar si se usó la carga de archivo (base64)
+                                    disabled={formData.imageUrl?.startsWith("data:image")}
                                     style={{ backgroundColor: "#333", color: "white" }}
                                 />
                             </Form.Group>

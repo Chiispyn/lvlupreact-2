@@ -27,6 +27,7 @@ export default defineConfig({
     environment: 'jsdom', // Simula navegador
     setupFiles: './src/setupTests.ts', // Config inicial (jest-dom, mocks, etc.)
     css: true, // Permite importar CSS
+    include: ['test/**/*.test.{ts,tsx}'],
 
     // 🧾 Reportes
     reporters: ['default', 'html'], // genera consola + HTML visual

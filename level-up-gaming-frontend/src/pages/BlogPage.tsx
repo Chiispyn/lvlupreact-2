@@ -3,10 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { BookOpen } from 'react-feather';
-import BlogCard from '../components/BlogCard'; // 🚨 Importar BlogCard
+import BlogCard from '../components/BlogCard';
 import axios from 'axios';
 
-// 🚨 Interfaces (debe coincidir con la que usa BlogCard)
 interface BlogPost {
     id: string;
     title: string;

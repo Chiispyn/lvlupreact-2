@@ -25,5 +25,26 @@ export interface Product {
     specifications: string; // Datos técnicos (JSON string)
     category: string; 
     reviews: Review[]; // Lista de comentarios para la página de detalle
-    isActive: true
+    isActive: boolean;
+}
+
+// Payload para crear/actualizar productos
+export interface ProductPayload {
+    name?: string;
+    description?: string;
+    price?: number;
+    imageUrl?: string;
+    specifications?: string;
+    category?: string;
+    countInStock?: number;
+    isTopSelling?: boolean;
+    rating?: number;
+    numReviews?: number;
+    isActive?: boolean;
+}
+
+// Estado para mensajes de estado
+export interface StatusMessage {
+    msg: string;
+    type: 'success' | 'danger';
 }

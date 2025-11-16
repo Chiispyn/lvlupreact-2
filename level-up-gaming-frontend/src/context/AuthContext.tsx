@@ -57,8 +57,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     useEffect(() => {
         if (user) {
             localStorage.setItem('user', JSON.stringify(user));
+            // Configurar header por defecto para axios (con defensas para mocks en tests)
+            const a: any = axios;
+            a.defaults = a.defaults || {};
+            a.defaults.headers = a.defaults.headers || {};
+            a.defaults.headers.common = a.defaults.headers.common || {};
+            a.defaults.headers.common['Authorization'] = `Bearer ${user.token}`;
         } else {
             localStorage.removeItem('user');
+            // Eliminar header de autorización al hacer logout
+            const a: any = axios;
+            if (a.defaults && a.defaults.headers && a.defaults.headers.common) {
+                delete a.defaults.headers.common['Authorization'];
+            }
         }
     }, [user]);
 
@@ -70,6 +81,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const userData: User = res.data;
             
             setUser(userData);
+            // Aplicar header de autorización inmediatamente (defensas para mocks)
+            const a: any = axios;
+            a.defaults = a.defaults || {};
+            a.defaults.headers = a.defaults.headers || {};
+            a.defaults.headers.common = a.defaults.headers.common || {};
+            a.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
             return true;
         } catch (error) {
             setUser(null);
@@ -80,6 +97,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // 🚨 FUNCIÓN PARA GUARDAR EL ESTADO DIRECTAMENTE (Usada en Registro y Edición de Perfil)
     const setUserFromRegistration = (userData: User) => {
         setUser(userData);
+        const a: any = axios;
+        a.defaults = a.defaults || {};
+        a.defaults.headers = a.defaults.headers || {};
+        a.defaults.headers.common = a.defaults.headers.common || {};
+        a.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
     };
 
     // Función de Logout
@@ -92,6 +114,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const res = await axios.post('/api/users/register', { name, email, password });
             const userData: User = res.data;
             setUser(userData);
+            const a: any = axios;
+            a.defaults = a.defaults || {};
+            a.defaults.headers = a.defaults.headers || {};
+            a.defaults.headers.common = a.defaults.headers.common || {};
+            a.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
             return true;
         } catch (error) {
             return false;
@@ -107,6 +134,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             });
             const updatedUserData: User = res.data;
             setUser(updatedUserData);
+            const a: any = axios;
+            a.defaults = a.defaults || {};
+            a.defaults.headers = a.defaults.headers || {};
+            a.defaults.headers.common = a.defaults.headers.common || {};
+            a.defaults.headers.common['Authorization'] = `Bearer ${updatedUserData.token}`;
             return true;
         } catch (error) {
             return false;
