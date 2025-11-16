@@ -300,4 +300,4 @@ npm test
 
 ---
 
-Si quieres, puedo formatear estas secciones en otro archivo `DOCS.md` o en la wiki del repo para mantener `readme.md` más ligero. ¿Prefieres que lo deje aquí o lo muevo a `DOCS.md`?
+
