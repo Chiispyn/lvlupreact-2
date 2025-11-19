@@ -1,42 +1,57 @@
 // level-up-gaming-frontend/test/context/AuthContext.test.tsx
 
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { ReactNode } from 'react';
-import { AuthProvider, useAuth } from '../../src/context/AuthContext';
+import { apiClient, AuthProvider, useAuth } from '../../src/context/AuthContext';
 import axios from 'axios'; // Importar el real para el mock
 
 // 🚨 CORRECCIÓN CRÍTICA: Mocking estricto de axios
-vi.mock('axios', () => ({
-    // Devolvemos el módulo completo, pero mockeamos post, put y defaults usados por AuthContext
-    default: {
+vi.mock('axios', () => {
+    const instance = {
         post: vi.fn(),
         put: vi.fn(),
         defaults: { headers: { common: {} } },
-        // Si usas get: get: vi.fn(),
-    },
-}));
+    };
 
+    return {
+        default: {
+            create: vi.fn(() => instance),
+            post: vi.fn(),
+            put: vi.fn(),
+            defaults: { headers: { common: {} } },
+            __instance: instance,
+        },
+    };
+});
 // Mock del objeto axios.post para tipado
-const axiosPostMock = axios.post as unknown as Mock;
+const axiosInstance = (axios as any).__instance;
+const axiosPostMock = axiosInstance.post;
+
 
 
 // Componente que envuelve el hook
 const MockWrapper = ({ children }: { children: ReactNode }) => (
     <AuthProvider>{children}</AuthProvider>
 );
-
 const mockAdminData = {
     id: 'u1',
     name: 'Admin Test',
     email: 'test@admin.com',
+    rut: '12345678-9',            
+    age: 30,                      
     role: 'admin',
     token: 'TEST_TOKEN_ADMIN',
     hasDuocDiscount: true,
     points: 1000,
     referralCode: 'TEST001',
-    address: { street: 'Main St', city: 'Concepcion', region: 'BioBio' },
+    address: {
+        street: 'Main St',
+        city: 'Concepcion',
+        region: 'BioBio'
+    },
 };
+
 
 
 describe('AuthContext: Gestión de Sesión y Persistencia', () => {
@@ -116,13 +131,20 @@ describe('AuthContext: Gestión de Sesión y Persistencia', () => {
         expect(result.current.isLoggedIn).toBe(true);
         expect(localStorageMock.setItem).toHaveBeenCalled();
     });
-
     it('6. la función de actualización de perfil debería tener éxito y actualizar el estado del usuario', async () => {
+
         localStorageMock.getItem.mockReturnValueOnce(JSON.stringify(mockAdminData));
+
         const { result } = renderHook(() => useAuth(), { wrapper: MockWrapper });
 
+        await waitFor(() => {
+            expect(result.current.user).not.toBeNull();
+        });
+
         const updatedUser = { ...mockAdminData, name: 'Updated Name' };
-        (axios.put as unknown as Mock).mockResolvedValue({ data: updatedUser });
+
+        // mock correcto en Vitest
+        (apiClient.put as any).mockResolvedValue({ data: updatedUser });
 
         await act(async () => {
             await result.current.updateProfile({ name: 'Updated Name' });
@@ -131,5 +153,7 @@ describe('AuthContext: Gestión de Sesión y Persistencia', () => {
         expect(result.current.user?.name).toBe('Updated Name');
         expect(localStorageMock.setItem).toHaveBeenCalledWith('user', JSON.stringify(updatedUser));
     });
+
+
 });
 
