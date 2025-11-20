@@ -1,6 +1,6 @@
 // level-up-gaming-frontend/src/services/OrderService.ts
 
-import axios from 'axios';
+import axios from './axiosConfig';
 import { Order, OrderUpdatePayload } from '../types/Order';
 import { API_ENDPOINTS } from './api.config';
 

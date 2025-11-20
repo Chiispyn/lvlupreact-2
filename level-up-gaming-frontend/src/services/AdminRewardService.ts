@@ -1,7 +1,7 @@
+
 // level-up-gaming-frontend/src/services/AdminRewardService.ts
 
 import axios from './axiosConfig';
-
 import { Reward, RewardFormData } from '../types/Reward';
 import { API_ENDPOINTS } from './api.config';
 import { REWARD_TYPES, REWARD_SEASONS } from '../utils/constants';
@@ -17,7 +17,7 @@ export const AdminRewardService = {
       const token = parsed?.token;
       if (!token) return {};
       // logging seguro: no mostramos todo el token
-      console.debug('[AdminRewardService] usando token:', `${token.slice(0,8)}...${token.slice(-8)}`);
+      console.debug('[AdminRewardService] usando token:', `${token.slice(0, 8)}...${token.slice(-8)}`);
       return { headers: { Authorization: `Bearer ${token}` } };
     } catch (e) {
       console.error('[AdminRewardService] error parseando localStorage user', e);

@@ -1,6 +1,6 @@
 // level-up-gaming-frontend/src/services/AdminProductService.ts
 
-import axios from 'axios';
+import axios from './axiosConfig';
 import { Product, ProductPayload } from '../types/Product';
 import { API_ENDPOINTS } from './api.config';
 import { PRODUCT_CATEGORIES, MAX_PRODUCT_STOCK, MAX_PRODUCT_PRICE_CLP } from '../utils/constants';

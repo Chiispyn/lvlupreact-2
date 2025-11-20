@@ -9,12 +9,18 @@
         "id": "v2",
         "title": "Como armar tu PC Gamer 2025",
         "embedUrl": "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/VhUyEgSiUaw?si=lXKV8RrmRn9DDg4C\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>",
-        "isFeatured": true
+        "isFeatured": false
     },
     {
         "id": "v3",
         "title": "Top 5: Auriculares Gaming 2025",
         "embedUrl": "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/6iW_iM-4T_0\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>",
         "isFeatured": false
+    },
+    {
+        "id": "5f3f508b-0216-4db4-bcbb-5bcab66a4370",
+        "title": "asdsad",
+        "embedUrl": "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/rf_U2LkUmTk?si=X3l2mCc_ds3AT5FO\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>",
+        "isFeatured": true
     }
 ]

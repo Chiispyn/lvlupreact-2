@@ -358,5 +358,59 @@
         "isPaid": true,
         "status": "Entregado",
         "createdAt": "2025-11-16T10:55:01.012Z"
+    },
+    {
+        "id": "20384bc4-ba72-466e-a371-4f875e96ee57",
+        "userId": "u1",
+        "items": [
+            {
+                "product": {
+                    "id": "JM001",
+                    "name": "Catan",
+                    "description": "Un clásico juego de estrategia donde los jugadores compiten por colonizar y expandirse en la isla de Catan. Perfecto para 3-4 jugadores, con una duración promedio de 60-90 minutos.",
+                    "price": 29990,
+                    "imageUrl": "/images/juego-catan.png",
+                    "rating": 4.8,
+                    "numReviews": 156,
+                    "isTopSelling": true,
+                    "countInStock": 20,
+                    "category": "Juegos de Mesa",
+                    "specifications": "{\"Jugadores\": \"3-4\", \"Tiempo\": \"60-90 min\", \"Estrategia\": \"Alta\"}",
+                    "isActive": true,
+                    "reviews": [
+                        {
+                            "id": "r1-1",
+                            "name": "Carlos M.",
+                            "rating": 5,
+                            "comment": "Excelente juego, muy entretenido para jugar en familia.",
+                            "createdAt": "2024-11-15T00:00:00Z"
+                        },
+                        {
+                            "id": "r1-2",
+                            "name": "María P.",
+                            "rating": 5,
+                            "comment": "Mi juego favorito! Siempre es diferente cada partida.",
+                            "createdAt": "2024-11-10T00:00:00Z"
+                        }
+                    ]
+                },
+                "quantity": 1,
+                "isRedeemed": false,
+                "pointsCost": 0
+            }
+        ],
+        "shippingAddress": {
+            "street": "Paicaví 3280",
+            "city": "Concepción",
+            "region": "Biobío",
+            "zipCode": "4030000",
+            "notes": ""
+        },
+        "paymentMethod": "webpay",
+        "totalPrice": 33992,
+        "shippingPrice": 10000,
+        "isPaid": true,
+        "status": "Pendiente",
+        "createdAt": "2025-11-20T22:09:36.098Z"
     }
 ]

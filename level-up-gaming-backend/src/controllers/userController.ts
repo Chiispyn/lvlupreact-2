@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { readFromDb, writeToDb } from '../utils/dbUtils';
 import bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
+import { type AuthRequest } from '../middleware/authMiddleware';
 
 const SECRET = process.env.JWT_SECRET || 'dev-secret';
 const SALT_ROUNDS = 10;
@@ -35,7 +36,7 @@ const authUser = async (req: Request, res: Response) => {
         return res.status(403).json({ message: 'Su cuenta ha sido desactivada. Contacte a soporte.' });
     }
 
-    const match = await bcrypt.compare(password, user.password);
+    const match = await bcrypt.compare(password, user.password!);
     if (!match) {
         return res.status(401).json({ message: 'Credenciales inválidas o usuario no encontrado.' });
     }
@@ -63,7 +64,7 @@ const registerUser = async (req: Request, res: Response) => {
     }
 
     const hasDuocDiscount = email.toLowerCase().endsWith('@duoc.cl') || email.toLowerCase().endsWith('@duocuc.cl');
-    
+
     let startingPoints = 100;
     const referralCode = generateReferralCode(name);
 
@@ -82,10 +83,10 @@ const registerUser = async (req: Request, res: Response) => {
     const hashed = await bcrypt.hash(password, SALT_ROUNDS);
 
     const newUser: User = {
-        id: uuidv4(), name, email, password: hashed, 
+        id: uuidv4(), name, email, password: hashed,
         rut, age: parseInt(age), role: 'customer', token: '',
         hasDuocDiscount, points: startingPoints, referralCode,
-        address, 
+        address,
         isActive: true,
     };
 
@@ -124,7 +125,7 @@ const updateUserProfile = async (req: Request, res: Response) => {
             address: address || user.address,
             password: updatedPassword,
         };
-        
+
         writeToDb<User>('users', users);
         const updatedUser = users[userIndex];
 
@@ -160,12 +161,12 @@ const createUser = async (req: Request, res: Response) => {
     const hashed = await bcrypt.hash(password, SALT_ROUNDS);
 
     const newUser: User = {
-        id: uuidv4(), name, email, password: hashed, 
-        rut: rut || 'NO ASIGNADO', age: parseInt(age) || 0, 
+        id: uuidv4(), name, email, password: hashed,
+        rut: rut || 'NO ASIGNADO', age: parseInt(age) || 0,
         role: role, token: '',
-        hasDuocDiscount: email.toLowerCase().endsWith('@duoc.cl') || email.toLowerCase().endsWith('@duocuc.cl'), 
-        points: 0, referralCode: generateReferralCode(name), 
-        address: address || { street: 'N/A', city: 'N/A', region: 'N/A', zipCode: 'N/A' }, 
+        hasDuocDiscount: email.toLowerCase().endsWith('@duoc.cl') || email.toLowerCase().endsWith('@duocuc.cl'),
+        points: 0, referralCode: generateReferralCode(name),
+        address: address || { street: 'N/A', city: 'N/A', region: 'N/A', zipCode: 'N/A' },
         isActive: true,
     };
 
@@ -190,7 +191,7 @@ const updateUserByAdmin = async (req: Request, res: Response) => {
         if (id === 'u1' && role !== users[userIndex].role) {
             return res.status(403).json({ message: 'No se puede cambiar el rol del administrador principal.' });
         }
-        
+
 
         let updatedPassword = users[userIndex].password;
         if (newPassword && newPassword.length >= 6) {
@@ -200,7 +201,7 @@ const updateUserByAdmin = async (req: Request, res: Response) => {
         users[userIndex] = {
             ...users[userIndex],
             name: name || users[userIndex].name,
-            email: email || users[userIndex].email,
+            email: email || users[userIndex].name,
             role: role || users[userIndex].role,
             rut: rut || users[userIndex].rut,
             age: parseInt(age) || users[userIndex].age,
@@ -219,9 +220,22 @@ const updateUserByAdmin = async (req: Request, res: Response) => {
 // ----------------------------------------------------
 // FUNCIÓN DE PUNTOS Y TOGGLE DE ESTADO
 // ----------------------------------------------------
-const updatePoints = (req: Request, res: Response) => {
+const updatePoints = (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const { pointsToAdd } = req.body;
+
+    // Validar permisos: el usuario debe ser admin O estar actualizando sus propios puntos
+    if (!req.user) {
+        return res.status(401).json({ message: 'No autorizado.' });
+    }
+
+    const isAdmin = req.user.role === 'admin';
+    const isOwnPoints = req.user.id === id;
+
+    if (!isAdmin && !isOwnPoints) {
+        return res.status(403).json({ message: 'No puedes actualizar los puntos de otro usuario.' });
+    }
+
     const users = readFromDb<User>('users');
     const userIndex = users.findIndex(u => u.id === id);
 
@@ -232,7 +246,7 @@ const updatePoints = (req: Request, res: Response) => {
         if (newBalance < 0) {
             return res.status(400).json({ message: 'Puntos insuficientes para realizar la operación.' });
         }
-        
+
         users[userIndex].points = newBalance;
         writeToDb<User>('users', users);
         res.json(users[userIndex]);
@@ -252,7 +266,7 @@ const toggleUserStatus = (req: Request, res: Response) => {
         if (id === 'u1') {
             return res.status(403).json({ message: 'No se puede desactivar al administrador principal.' });
         }
-        
+
         users[userIndex].isActive = isActive;
         writeToDb<User>('users', users);
         res.json(users[userIndex]);

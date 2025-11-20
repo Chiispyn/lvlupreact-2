@@ -1,6 +1,6 @@
 // level-up-gaming-frontend/src/services/AdminVideoService.ts
 
-import axios from 'axios';
+import axios from './axiosConfig';
 import { Video, VideoFormData } from '../types/Video';
 import { API_ENDPOINTS } from './api.config';
 

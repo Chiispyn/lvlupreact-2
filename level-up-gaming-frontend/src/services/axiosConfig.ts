@@ -1,8 +1,8 @@
 // level-up-gaming-frontend/src/services/axiosConfig.ts
 import axios from "axios";
-import { API_BASE_URL } from "./api.config";
 
-axios.defaults.baseURL = API_BASE_URL;
+
+// axios.defaults.baseURL = API_BASE_URL;
 
 // Interceptor: agrega token automáticamente a TODAS las peticiones
 axios.interceptors.request.use((config) => {

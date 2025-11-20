@@ -1,6 +1,6 @@
 // level-up-gaming-frontend/src/services/AdminEventService.ts
 
-import axios from 'axios';
+import axios from './axiosConfig';
 import { Event, EventFormData } from '../types/Event';
 import { API_ENDPOINTS } from './api.config';
 
