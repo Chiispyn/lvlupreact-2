@@ -182,3 +182,13 @@ h1, h2, h3, h4, h5, h6 {
 .custom-table tr:last-child td {
     border-bottom: none;
 }
+
+/* ------------------------------------
+   4. FIX: BOTÓN DE CIERRE EN MODALES OSCUROS
+------------------------------------ */
+/* Hacer visible el botón X de cerrar en modales con fondo oscuro */
+.modal-header .btn-close {
+    filter: invert(1) brightness(2);
+    opacity: 1;
+}
+

@@ -201,7 +201,7 @@ const updateUserByAdmin = async (req: Request, res: Response) => {
         users[userIndex] = {
             ...users[userIndex],
             name: name || users[userIndex].name,
-            email: email || users[userIndex].name,
+            email: email || users[userIndex].email,
             role: role || users[userIndex].role,
             rut: rut || users[userIndex].rut,
             age: parseInt(age) || users[userIndex].age,

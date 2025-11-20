@@ -21,6 +21,12 @@
         "id": "5f3f508b-0216-4db4-bcbb-5bcab66a4370",
         "title": "asdsad",
         "embedUrl": "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/rf_U2LkUmTk?si=X3l2mCc_ds3AT5FO\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>",
+        "isFeatured": false
+    },
+    {
+        "id": "510460b2-41c2-4533-bc10-38be0a993d6b",
+        "title": "afafs",
+        "embedUrl": "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/DTeGYPjqwPs?si=3nLOiq-vUCXf6m5f\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>",
         "isFeatured": true
     }
 ]
