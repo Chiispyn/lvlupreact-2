@@ -9,7 +9,7 @@
         "role": "admin",
         "token": "MOCK_ADMIN_TOKEN_123",
         "hasDuocDiscount": true,
-        "points": 6355,
+        "points": 7585,
         "referralCode": "ADMIN1000",
         "isActive": true,
         "address": {
@@ -29,7 +29,7 @@
         "role": "customer",
         "token": "MOCK_CUSTOMER_TOKEN_6e3338dd",
         "hasDuocDiscount": false,
-        "points": 14389,
+        "points": 15663,
         "referralCode": "WAC8566",
         "address": {
             "street": "springfield 243",
