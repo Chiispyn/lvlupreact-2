@@ -1029,5 +1029,347 @@
         "isPaid": true,
         "status": "Pendiente",
         "createdAt": "2025-11-20T23:05:56.909Z"
+    },
+    {
+        "id": "324970d5-973c-4662-9a0b-1d33dfa129b2",
+        "userId": "u1",
+        "items": [
+            {
+                "product": {
+                    "id": "AC001",
+                    "name": "Controlador Inalámbrico Xbox Series X",
+                    "description": "Ofrece una experiencia de juego cómoda con botones mapeables y una respuesta táctil mejorada.",
+                    "price": 59990,
+                    "imageUrl": "/images/controlador-xbox.png",
+                    "rating": 4.9,
+                    "numReviews": 215,
+                    "isTopSelling": true,
+                    "countInStock": 40,
+                    "category": "Accesorios",
+                    "specifications": "{\"Conectividad\": \"Inalámbrica/Bluetooth\", \"Batería\": \"AA/Recargable\"}",
+                    "isActive": true,
+                    "reviews": [
+                        {
+                            "id": "r3-1",
+                            "name": "Pedro A.",
+                            "rating": 5,
+                            "comment": "Es el mejor control que he tenido.",
+                            "createdAt": "2024-11-25T00:00:00Z"
+                        }
+                    ]
+                },
+                "quantity": 1,
+                "isRedeemed": false,
+                "pointsCost": 0
+            },
+            {
+                "product": {
+                    "id": "JM001",
+                    "name": "Catan",
+                    "description": "Un clásico juego de estrategia donde los jugadores compiten por colonizar y expandirse en la isla de Catan. Perfecto para 3-4 jugadores, con una duración promedio de 60-90 minutos.",
+                    "price": 29990,
+                    "imageUrl": "/images/juego-catan.png",
+                    "rating": 4.8,
+                    "numReviews": 156,
+                    "isTopSelling": true,
+                    "countInStock": 20,
+                    "category": "Juegos de Mesa",
+                    "specifications": "{\"Jugadores\": \"3-4\", \"Tiempo\": \"60-90 min\", \"Estrategia\": \"Alta\"}",
+                    "isActive": true,
+                    "reviews": [
+                        {
+                            "id": "r1-1",
+                            "name": "Carlos M.",
+                            "rating": 5,
+                            "comment": "Excelente juego, muy entretenido para jugar en familia.",
+                            "createdAt": "2024-11-15T00:00:00Z"
+                        },
+                        {
+                            "id": "r1-2",
+                            "name": "María P.",
+                            "rating": 5,
+                            "comment": "Mi juego favorito! Siempre es diferente cada partida.",
+                            "createdAt": "2024-11-10T00:00:00Z"
+                        }
+                    ]
+                },
+                "quantity": 1,
+                "isRedeemed": false,
+                "pointsCost": 0
+            }
+        ],
+        "shippingAddress": {
+            "street": "Paicaví 3280",
+            "city": "Concepción",
+            "region": "Biobío",
+            "zipCode": "4030000",
+            "notes": ""
+        },
+        "paymentMethod": "webpay",
+        "totalPrice": 81984,
+        "shippingPrice": 10000,
+        "isPaid": true,
+        "status": "Pendiente",
+        "createdAt": "2025-11-21T00:13:23.152Z"
+    },
+    {
+        "id": "170aad34-0166-4d87-943f-d5fe854f1cf8",
+        "userId": "u1",
+        "items": [
+            {
+                "product": {
+                    "id": "MS001",
+                    "name": "Mouse Gamer Logitech G502 HERO",
+                    "description": "Con sensor de alta precisión y botones personalizables, ideal para gamers que buscan control preciso.",
+                    "price": 49990,
+                    "imageUrl": "/images/mouse-logitech-g502.png",
+                    "rating": 4.9,
+                    "numReviews": 250,
+                    "isTopSelling": false,
+                    "countInStock": 60,
+                    "category": "Accesorios",
+                    "specifications": "{\"Sensor\": \"HERO 25K\", \"DPI\": \"25600\", \"Peso\": \"Ajustable\"}",
+                    "isActive": true,
+                    "reviews": [
+                        {
+                            "id": "r8-1",
+                            "name": "Gabriel N.",
+                            "rating": 5,
+                            "comment": "El mejor mouse para gaming.",
+                            "createdAt": "2024-11-27T00:00:00Z"
+                        }
+                    ]
+                },
+                "quantity": 1,
+                "isRedeemed": false,
+                "pointsCost": 0
+            },
+            {
+                "product": {
+                    "id": "SG001",
+                    "name": "Silla Gamer Secretlab Titan",
+                    "description": "Diseñada para el máximo confort, con un soporte ergonómico y reclinación multi-ángulo.",
+                    "price": 349990,
+                    "imageUrl": "/images/silla-gamer-secretlab.png",
+                    "rating": 4.8,
+                    "numReviews": 110,
+                    "isTopSelling": false,
+                    "countInStock": 12,
+                    "category": "Accesorios",
+                    "specifications": "{\"Soporte\": \"Lumbar incorporado\", \"Material\": \"Cuero sintético\"}",
+                    "isActive": true,
+                    "reviews": [
+                        {
+                            "id": "r7-1",
+                            "name": "José M.",
+                            "rating": 5,
+                            "comment": "Es increíblemente cómoda.",
+                            "createdAt": "2024-11-23T00:00:00Z"
+                        }
+                    ]
+                },
+                "quantity": 1,
+                "isRedeemed": false,
+                "pointsCost": 0
+            },
+            {
+                "product": {
+                    "id": "AC002",
+                    "name": "Auriculares Gamer HyperX Cloud II",
+                    "description": "Proporcionan un sonido envolvente de calidad con un micrófono desmontable y almohadillas de espuma viscoelástica.",
+                    "price": 79990,
+                    "imageUrl": "/images/auriculares-hyperx.png",
+                    "rating": 4.7,
+                    "numReviews": 190,
+                    "isTopSelling": true,
+                    "countInStock": 30,
+                    "category": "Accesorios",
+                    "specifications": "{\"Sonido\": \"7.1 Surround\", \"Micrófono\": \"Desmontable\"}",
+                    "isActive": true,
+                    "reviews": [
+                        {
+                            "id": "r4-1",
+                            "name": "Felipe T.",
+                            "rating": 5,
+                            "comment": "El sonido 7.1 es increíble.",
+                            "createdAt": "2024-11-24T00:00:00Z"
+                        }
+                    ]
+                },
+                "quantity": 1,
+                "isRedeemed": false,
+                "pointsCost": 0
+            }
+        ],
+        "shippingAddress": {
+            "street": "Paicaví 3280",
+            "city": "Concepción",
+            "region": "Biobío",
+            "zipCode": "4030000",
+            "notes": ""
+        },
+        "paymentMethod": "webpay",
+        "totalPrice": 383976,
+        "shippingPrice": 0,
+        "isPaid": true,
+        "status": "Pendiente",
+        "createdAt": "2025-11-21T00:14:42.065Z"
+    },
+    {
+        "id": "46985fa2-5612-4ae5-8413-c60faf0fd321",
+        "userId": "u1",
+        "items": [
+            {
+                "product": {
+                    "id": "JM001",
+                    "name": "Catan",
+                    "description": "Un clásico juego de estrategia donde los jugadores compiten por colonizar y expandirse en la isla de Catan. Perfecto para 3-4 jugadores, con una duración promedio de 60-90 minutos.",
+                    "price": 29990,
+                    "imageUrl": "/images/juego-catan.png",
+                    "rating": 4.8,
+                    "numReviews": 156,
+                    "isTopSelling": true,
+                    "countInStock": 20,
+                    "category": "Juegos de Mesa",
+                    "specifications": "{\"Jugadores\": \"3-4\", \"Tiempo\": \"60-90 min\", \"Estrategia\": \"Alta\"}",
+                    "isActive": true,
+                    "reviews": [
+                        {
+                            "id": "r1-1",
+                            "name": "Carlos M.",
+                            "rating": 5,
+                            "comment": "Excelente juego, muy entretenido para jugar en familia.",
+                            "createdAt": "2024-11-15T00:00:00Z"
+                        },
+                        {
+                            "id": "r1-2",
+                            "name": "María P.",
+                            "rating": 5,
+                            "comment": "Mi juego favorito! Siempre es diferente cada partida.",
+                            "createdAt": "2024-11-10T00:00:00Z"
+                        }
+                    ]
+                },
+                "quantity": 1,
+                "isRedeemed": false,
+                "pointsCost": 0
+            },
+            {
+                "product": {
+                    "id": "CO001",
+                    "name": "PlayStation 5",
+                    "description": "La consola de última generación de Sony, que ofrece gráficos impresionantes en 4K y tiempos de carga ultrarrápidos.",
+                    "price": 549990,
+                    "imageUrl": "/images/playstation-5-console.png",
+                    "rating": 4.9,
+                    "numReviews": 350,
+                    "isTopSelling": true,
+                    "countInStock": 5,
+                    "category": "Consolas",
+                    "specifications": "{\"CPU\": \"8x Zen 2 Cores\", \"GPU\": \"10.28 TFLOPS\", \"SSD\": \"825GB Custom\"}",
+                    "isActive": true,
+                    "reviews": [
+                        {
+                            "id": "r5-1",
+                            "name": "Isabel B.",
+                            "rating": 5,
+                            "comment": "Una consola increíble. Los gráficos son de otro nivel.",
+                            "createdAt": "2024-11-26T00:00:00Z"
+                        }
+                    ]
+                },
+                "quantity": 1,
+                "isRedeemed": false,
+                "pointsCost": 0
+            }
+        ],
+        "shippingAddress": {
+            "street": "Paicaví 3280",
+            "city": "Concepción",
+            "region": "Biobío",
+            "zipCode": "4030000",
+            "notes": ""
+        },
+        "paymentMethod": "webpay",
+        "totalPrice": 463984,
+        "shippingPrice": 0,
+        "isPaid": true,
+        "status": "Pendiente",
+        "createdAt": "2025-11-21T05:25:29.620Z"
+    },
+    {
+        "id": "0300e617-d7cf-4162-a4ca-aec45d185d99",
+        "userId": "u1",
+        "items": [
+            {
+                "product": {
+                    "id": "CO001",
+                    "name": "PlayStation 5",
+                    "description": "La consola de última generación de Sony, que ofrece gráficos impresionantes en 4K y tiempos de carga ultrarrápidos.",
+                    "price": 549990,
+                    "imageUrl": "/images/playstation-5-console.png",
+                    "rating": 4.9,
+                    "numReviews": 350,
+                    "isTopSelling": true,
+                    "countInStock": 5,
+                    "category": "Consolas",
+                    "specifications": "{\"CPU\": \"8x Zen 2 Cores\", \"GPU\": \"10.28 TFLOPS\", \"SSD\": \"825GB Custom\"}",
+                    "isActive": true,
+                    "reviews": [
+                        {
+                            "id": "r5-1",
+                            "name": "Isabel B.",
+                            "rating": 5,
+                            "comment": "Una consola increíble. Los gráficos son de otro nivel.",
+                            "createdAt": "2024-11-26T00:00:00Z"
+                        }
+                    ]
+                },
+                "quantity": 1,
+                "isRedeemed": false,
+                "pointsCost": 0
+            },
+            {
+                "product": {
+                    "id": "AC002",
+                    "name": "Auriculares Gamer HyperX Cloud II",
+                    "description": "Proporcionan un sonido envolvente de calidad con un micrófono desmontable y almohadillas de espuma viscoelástica.",
+                    "price": 79990,
+                    "imageUrl": "/images/auriculares-hyperx.png",
+                    "rating": 4.7,
+                    "numReviews": 190,
+                    "isTopSelling": true,
+                    "countInStock": 30,
+                    "category": "Accesorios",
+                    "specifications": "{\"Sonido\": \"7.1 Surround\", \"Micrófono\": \"Desmontable\"}",
+                    "isActive": true,
+                    "reviews": [
+                        {
+                            "id": "r4-1",
+                            "name": "Felipe T.",
+                            "rating": 5,
+                            "comment": "El sonido 7.1 es increíble.",
+                            "createdAt": "2024-11-24T00:00:00Z"
+                        }
+                    ]
+                },
+                "quantity": 1,
+                "isRedeemed": false,
+                "pointsCost": 0
+            }
+        ],
+        "shippingAddress": {
+            "street": "Paicaví 3280",
+            "city": "Concepción",
+            "region": "Biobío",
+            "zipCode": "4030000",
+            "notes": ""
+        },
+        "paymentMethod": "webpay",
+        "totalPrice": 503984,
+        "shippingPrice": 0,
+        "isPaid": true,
+        "status": "Pendiente",
+        "createdAt": "2025-11-21T05:29:33.737Z"
     }
 ]

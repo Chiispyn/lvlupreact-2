@@ -9,7 +9,7 @@
         "role": "admin",
         "token": "MOCK_ADMIN_TOKEN_123",
         "hasDuocDiscount": true,
-        "points": 7585,
+        "points": 23215,
         "referralCode": "ADMIN1000",
         "isActive": true,
         "address": {
