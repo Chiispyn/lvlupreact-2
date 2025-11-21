@@ -277,7 +277,9 @@ const CheckoutPage: React.FC = () => {
             // 2. ACTUALIZAR PUNTOS DEL USUARIO (Ganancia neta)
             if (user && netPointsChange !== 0) {
                 const resPoints = await axios.put<AuthUser>(`/api/users/${user.id}/points`, { pointsToAdd: netPointsChange });
-                setUserFromRegistration(resPoints.data);
+                // 🚨 FIX: Preservar el token actual, ya que el backend podría devolver uno viejo de la DB
+                const updatedUser = { ...resPoints.data, token: user.token };
+                setUserFromRegistration(updatedUser);
             }
 
             // 3. ABRIR MODAL Y FINALIZAR
