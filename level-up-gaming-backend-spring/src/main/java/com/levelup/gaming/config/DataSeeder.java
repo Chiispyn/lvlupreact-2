@@ -213,7 +213,7 @@ public class DataSeeder {
                                 u1.setPoints(500);
                                 u1.setReferralCode("ADMIN1000");
                                 u1.setActive(true);
-                                u1.setAddress(new Address("Paicaví 3280", "Concepción", "Biobío", "4030000"));
+                                u1.setAddress(new Address("Paicaví 3280", "Concepción", "Biobío"));
 
                                 userRepository.save(u1);
                                 System.out.println("Users seeded successfully!");

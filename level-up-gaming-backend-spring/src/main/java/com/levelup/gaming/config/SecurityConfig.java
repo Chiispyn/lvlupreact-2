@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .username(user.getEmail())
                         .password(user.getPassword())
                         .roles(user.getRole().toUpperCase())
+                        .disabled(!user.isActive())
                         .build())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }

@@ -64,6 +64,7 @@ public class UserController {
         String baseCode = user.getName().length() >= 3 ? user.getName().substring(0, 3).toUpperCase() : "USR";
         String refCode = "REF-" + baseCode + (int) (Math.random() * 10000);
         user.setReferralCode(refCode);
+        user.setActive(true);
 
         // Save user (password is stored as plain text per current PasswordEncoder
         // config)

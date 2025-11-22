@@ -122,14 +122,14 @@ const RegisterPage: React.FC = () => {
             const payload = {
                 name,
                 email,
+
                 password,
                 rut: rut.replace(/[^0-9kK]/g, ''),
                 age: ageInt,
                 address: {
                     street,
                     city,
-                    region,
-                    zipCode: ''
+                    region
                 },
                 referredBy: referralCodeInput || null
             };
