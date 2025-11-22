@@ -13,8 +13,8 @@ import CHILEAN_REGIONS_DATA from '../data/chile_regions.json';
 
 // Definición de las interfaces (Necesarias para el tipado)
 interface ShippingAddress { street: string; city: string; region: string; zipCode?: string; }
-interface CartItem { product: { name: string; price: number }; quantity: number; isRedeemed?: boolean; pointsCost?: number; }
-interface Order { id: string; userId: string; items: CartItem[]; shippingAddress: ShippingAddress; paymentMethod: 'webpay' | 'transferencia' | 'efectivo'; totalPrice: number; shippingPrice: number; isPaid: boolean; status: string; createdAt: string; }
+interface OrderItem { name: string; price: number; quantity: number; qty?: number; }
+interface Order { id: string; userId: string; items: OrderItem[]; shippingAddress: ShippingAddress; paymentMethod: 'webpay' | 'transferencia' | 'efectivo'; totalPrice: number; shippingPrice: number; isPaid: boolean; status: string; createdAt: string; }
 
 // CONSTANTES GLOBALES
 const CLP_FORMATTER = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 });
@@ -193,9 +193,10 @@ const CheckoutPage: React.FC = () => {
     // CÁLCULO DE COSTOS Y DESCUENTOS
     const subtotal = totalPrice;
 
-    // 1. Descuento DUOCUC
+    // 1. Descuento DUOCUC (se aplica primero)
     const discountRate = user?.hasDuocDiscount ? 0.20 : 0;
     const discountDuoc = subtotal * discountRate;
+    const subtotalAfterDuoc = subtotal - discountDuoc;
 
     // 2. Variables para Canjes Aplicados
     let totalPointsToRedeem = 0;
@@ -207,27 +208,29 @@ const CheckoutPage: React.FC = () => {
         if (item.isRedeemed && item.pointsCost) {
             totalPointsToRedeem += item.pointsCost * item.quantity;
 
-            // Recompensa 104: Envío Gratis
-            if (item.product.id === 'reward-104') {
+            // 🎯 Sistema dinámico de descuentos basado en propiedades del reward
+            const discountType = (item.product as any).discountType;
+            const discountValue = (item.product as any).discountValue;
+
+            if (discountType === 'FREE_SHIPPING') {
+                // Envío gratis
                 isShippingFree = true;
-            }
-
-            // Recompensa 102: Cupón de $5000 CLP (valor fijo)
-            if (item.product.id === 'reward-102') {
-                totalMonetaryCouponValue += COUPON_MONETARY_VALUE * item.quantity;
-            }
-
-            // Recompensa 106: Cupón 15% OFF (valor porcentual)
-            if (item.product.id === 'reward-106') {
-                totalDiscountAppliedPercent += subtotal * COUPON_PERCENT_RATE;
+            } else if (discountType === 'FIXED_AMOUNT' && discountValue) {
+                // Descuento de monto fijo (ej: $5000)
+                totalMonetaryCouponValue += discountValue * item.quantity;
+            } else if (discountType === 'PERCENTAGE' && discountValue) {
+                // Descuento porcentual (ej: 15%, 20%)
+                // Se aplica sobre el subtotal después del descuento DUOCUC
+                totalDiscountAppliedPercent += subtotalAfterDuoc * discountValue * item.quantity;
             }
         }
     });
 
     // 3. APLICACIÓN FINAL DEL TOTAL
-    const totalDiscountApplied = discountDuoc + totalMonetaryCouponValue + totalDiscountAppliedPercent;
+    // Orden: DUOCUC -> Descuento % -> Descuento fijo
+    const totalDiscountApplied = discountDuoc + totalDiscountAppliedPercent + totalMonetaryCouponValue;
 
-    const finalTotalAfterAllDiscounts = subtotal - totalDiscountApplied;
+    const finalTotalAfterAllDiscounts = Math.max(0, subtotal - totalDiscountApplied);
 
     // Costo de Envío (con lógica por región)
     const shippingPrice = getShippingCost(shippingAddress.region, isShippingFree);

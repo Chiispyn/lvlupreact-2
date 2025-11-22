@@ -20,23 +20,23 @@ const ProductsPage: React.FC = () => {
     // 🚨 CAMBIO: Se obtienen todos los productos una sola vez
     useEffect(() => {
         const fetchAllProducts = async () => {
-        setLoading(true);
-        setError(null);
-        try {
+            setLoading(true);
+            setError(null);
+            try {
                 const response = await fetch(API_URL);
-            
-            if (!response.ok) {
-                throw new Error('No se pudieron cargar los productos del servidor.');
-            }
 
-            const data: Product[] = await response.json();
-            const activeProducts = data.filter(product => product.isActive);
+                if (!response.ok) {
+                    throw new Error('No se pudieron cargar los productos del servidor.');
+                }
+
+                const data: Product[] = await response.json();
+                const activeProducts = data.filter(product => product.active); // Changed from isActive to active
                 setAllProducts(activeProducts);
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
         };
 
         fetchAllProducts();
@@ -62,7 +62,7 @@ const ProductsPage: React.FC = () => {
         <Container className="py-5">
             <style>{`.product-search-input::placeholder { color: #999; opacity: 1; }`}</style>
             <h1 style={{ color: 'var(--color-azul-electrico)' }}>Catálogo de Productos</h1>
-            
+
             {/* 🚨 NUEVO: Buscador en su propia fila */}
             <Row className="mb-4 justify-content-center">
                 <Col md={6}>

@@ -1,14 +1,14 @@
 // level-up-gaming-frontend/src/pages/AdminProductsPage.tsx
 
 import React, { useState, useEffect, FormEvent } from 'react';
-import { 
-    Container, Table, Alert, Spinner, Badge, Button, Modal, Row, Col, 
-    Form, Card, ButtonGroup 
+import {
+    Container, Table, Alert, Spinner, Badge, Button, Modal, Row, Col,
+    Form, Card, ButtonGroup
 } from 'react-bootstrap';
 import { Edit, ArrowLeft, PlusCircle, AlertTriangle, ToggleLeft, ToggleRight } from 'react-feather';
 import { Link } from 'react-router-dom';
 
-import AdminLayout from '../layouts/AdminLayout'; 
+import AdminLayout from '../layouts/AdminLayout';
 import { Product, ProductPayload, StatusMessage } from '../types/Product';
 import adminProductService from '../services/adminProductService';
 
@@ -31,11 +31,11 @@ const AdminProductsPage: React.FC = () => {
     const [statusMessage, setStatusMessage] = useState<StatusMessage | null>(null);
 
     const [showToggleActiveModal, setShowToggleActiveModal] = useState(false);
-    const [itemToToggle, setItemToToggle] = useState<{ id: string, name: string, isActive: boolean } | null>(null);
+    const [itemToToggle, setItemToToggle] = useState<{ id: string, name: string, active: boolean } | null>(null);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [stockSortOrder, setStockSortOrder] = useState<'asc' | 'desc' | ''>('');
-    
+
     // Función de Servicio Refactorizada
     const loadProducts = async () => {
         setLoading(true);
@@ -61,7 +61,7 @@ const AdminProductsPage: React.FC = () => {
 
     // Función que abre el modal de confirmación
     const confirmToggleActive = (id: string, currentStatus: boolean, name: string) => {
-        setItemToToggle({ id, name, isActive: currentStatus });
+        setItemToToggle({ id, name, active: currentStatus });
         setShowToggleActiveModal(true);
     };
 
@@ -69,7 +69,7 @@ const AdminProductsPage: React.FC = () => {
     const executeToggleActive = async () => {
         if (!itemToToggle) return;
 
-        const newStatus = !itemToToggle.isActive;
+        const newStatus = !itemToToggle.active;
         try {
             const updatedProduct = await adminProductService.toggleProductActiveStatus(itemToToggle.id, newStatus);
 
@@ -120,7 +120,7 @@ const AdminProductsPage: React.FC = () => {
                         <ArrowLeft size={16} className="me-2" /> Volver al Panel
                     </Button>
                 </Link>
-                
+
                 <h1 style={{ color: '#1E90FF' }}>Gestión de Productos</h1>
 
                 <Button variant="success" onClick={() => setShowCreateModal(true)}>
@@ -160,8 +160,8 @@ const AdminProductsPage: React.FC = () => {
             )}
 
             {/* TABLA ESCRITORIO (d-none d-md-block) */}
-            <div className="table-responsive d-none d-md-block"> 
-                <Table striped bordered hover className="table-dark"style={{ backgroundColor: '#111', color: 'white' }}>
+            <div className="table-responsive d-none d-md-block">
+                <Table striped bordered hover className="table-dark" style={{ backgroundColor: '#111', color: 'white' }}>
                     <thead>
                         <tr>
                             <th>Nombre</th>
@@ -175,21 +175,21 @@ const AdminProductsPage: React.FC = () => {
 
                     <tbody>
                         {filteredAndSortedProducts.map(product => (
-                            <tr key={product.id} className={!product.isActive ? 'text-muted' : ''} style={{ opacity: product.isActive ? 1 : 0.6 }}>
+                            <tr key={product.id} className={!product.active ? 'text-muted' : ''} style={{ opacity: product.active ? 1 : 0.6 }}>
                                 <td>{product.name}</td>
                                 <td>{formatClp(product.price)}</td>
                                 <td><Badge bg={product.countInStock > 5 ? 'success' : product.countInStock > 0 ? 'warning' : 'danger'}>{product.countInStock}</Badge></td>
                                 <td><Badge bg="info">{product.category}</Badge></td>
-                                <td><Badge bg={product.isActive ? 'success' : 'secondary'}>{product.isActive ? 'Activo' : 'Inactivo'}</Badge></td>
+                                <td><Badge bg={product.active ? 'success' : 'secondary'}>{product.active ? 'Activo' : 'Inactivo'}</Badge></td>
                                 <td>
                                     <Button variant="info" size="sm" className="me-2" onClick={() => setSelectedProduct(product)}>
                                         <Edit size={14} />
                                     </Button>
-                                    <Button 
-                                        variant={product.isActive ? 'warning' : 'success'} 
-                                        size="sm" onClick={() => confirmToggleActive(product.id, product.isActive, product.name)} 
-                                        title={product.isActive ? 'Desactivar' : 'Activar'}>
-                                        {product.isActive ? <ToggleLeft size={14} /> : <ToggleRight size={14} />}
+                                    <Button
+                                        variant={product.active ? 'warning' : 'success'}
+                                        size="sm" onClick={() => confirmToggleActive(product.id, product.active, product.name)}
+                                        title={product.active ? 'Desactivar' : 'Activar'}>
+                                        {product.active ? <ToggleLeft size={14} /> : <ToggleRight size={14} />}
                                     </Button>
                                 </td>
                             </tr>
@@ -202,25 +202,25 @@ const AdminProductsPage: React.FC = () => {
             <Row className="d-block d-md-none g-3">
                 {filteredAndSortedProducts.map(product => (
                     <Col xs={12} key={product.id}>
-                        <Card style={{ backgroundColor: '#222', border: `1px solid ${product.isActive ? '#1E90FF' : '#555'}`, color: 'white', opacity: product.isActive ? 1 : 0.7 }}>
+                        <Card style={{ backgroundColor: '#222', border: `1px solid ${product.active ? '#1E90FF' : '#555'}`, color: 'white', opacity: product.active ? 1 : 0.7 }}>
                             <Card.Body>
                                 <div className="d-flex justify-content-between align-items-center">
                                     <h5 className="mb-0" style={{ color: '#39FF14' }}>{product.name}</h5>
                                     <Badge bg="info">{product.category}</Badge>
                                 </div>
 
-                                <hr style={{ borderColor: '#444' }}/>
+                                <hr style={{ borderColor: '#444' }} />
 
                                 <p className="mb-1">Precio: <strong>{formatClp(product.price)} CLP</strong></p>
                                 <p className="mb-3">Stock: <Badge bg={product.countInStock > 5 ? 'success' : 'warning'}>{product.countInStock}</Badge></p>
-                                <p className="mb-3">Estado: <Badge bg={product.isActive ? 'success' : 'secondary'}>{product.isActive ? 'Activo' : 'Inactivo'}</Badge></p>
+                                <p className="mb-3">Estado: <Badge bg={product.active ? 'success' : 'secondary'}>{product.active ? 'Activo' : 'Inactivo'}</Badge></p>
 
                                 <div className="d-grid gap-2">
                                     <Button variant="info" size="sm" onClick={() => setSelectedProduct(product)}>
-                                        <Edit size={14} className="me-1"/> Editar
+                                        <Edit size={14} className="me-1" /> Editar
                                     </Button>
-                                    <Button variant={product.isActive ? 'warning' : 'success'} size="sm" onClick={() => confirmToggleActive(product.id, product.isActive, product.name)}>
-                                        {product.isActive ? 'Desactivar' : 'Activar'}
+                                    <Button variant={product.active ? 'warning' : 'success'} size="sm" onClick={() => confirmToggleActive(product.id, product.active, product.name)}>
+                                        {product.active ? 'Desactivar' : 'Activar'}
                                     </Button>
                                 </div>
                             </Card.Body>
@@ -244,13 +244,13 @@ const AdminProductsPage: React.FC = () => {
                 handleClose={() => setShowToggleActiveModal(false)}
                 handleConfirm={executeToggleActive}
                 itemName={itemToToggle?.name || 'este producto'}
-                isActivating={!itemToToggle?.isActive}
+                isActivating={!itemToToggle?.active}
             />
         </AdminLayout>
     );
 };
 
-export default AdminProductsPage;
+
 
 // ----------------------------------------------------
 // MODAL DE CONFIRMACIÓN PARA ACTIVAR/DESACTIVAR
@@ -288,18 +288,18 @@ const ConfirmToggleActiveModal: React.FC<ConfirmToggleActiveModalProps> = ({ sho
 // PRODUCT MODAL (Corregido: usa AdminProductService.CONSTANTE)
 // ----------------------------------------------------
 
-interface ProductModalProps { 
-    show: boolean; 
-    handleClose: () => void; 
-    currentProduct: Product | null; 
-    fetchProducts: () => void; 
-    showStatus: (msg: string, type: 'success' | 'danger') => void; 
+interface ProductModalProps {
+    show: boolean;
+    handleClose: () => void;
+    currentProduct: Product | null;
+    fetchProducts: () => void;
+    showStatus: (msg: string, type: 'success' | 'danger') => void;
 }
 
 const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentProduct, fetchProducts, showStatus }) => {
-    
+
     const isEditing = !!currentProduct;
-    const [formData, setFormData] = useState<ProductPayload>({ isActive: true }); 
+    const [formData, setFormData] = useState<ProductPayload>({ active: true });
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -323,29 +323,29 @@ const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentP
                 isTopSelling: false,
                 rating: 0,
                 numReviews: 0,
-                isActive: true, 
+                active: true,
             });
             setPreviewUrl(null);
         }
         setError(null);
-    }, [currentProduct, show]); 
+    }, [currentProduct, show]);
 
     const updateFormData = (e: React.ChangeEvent<any>) => {
         const { name, value, type } = e.target;
-        
+
         if (type === 'checkbox' || type === 'switch') {
             setFormData(prev => ({ ...prev, [name]: e.target.checked }));
             return;
         }
-        
+
         if (name === 'price' || name === 'countInStock') {
             const intValue = parseInt(value);
             // CORREGIDO: Usamos adminProductService.MAX_STOCK
-            if (name === 'countInStock' && intValue > adminProductService.MAX_STOCK) return; 
+            if (name === 'countInStock' && intValue > adminProductService.MAX_STOCK) return;
             // CORREGIDO: Usamos adminProductService.MAX_PRICE_CLP
             if (name === 'price' && intValue > adminProductService.MAX_PRICE_CLP) return;
             setFormData(prev => ({ ...prev, [name]: isNaN(intValue) ? 0 : intValue }));
-            return; 
+            return;
         }
 
         setFormData(prev => ({
@@ -452,7 +452,6 @@ const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentP
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label>Stock Disponible</Form.Label>
-                                {/* CORREGIDO: Uso directo del alias de servicio */}
                                 <Form.Control type="number" name="countInStock" value={formData.countInStock ?? 0} onChange={updateFormData} min="0" max={adminProductService.MAX_STOCK} style={{ backgroundColor: '#333', color: 'white' }} />
                             </Form.Group>
                         </Col>
@@ -472,7 +471,6 @@ const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentP
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label>Precio (CLP)</Form.Label>
-                                {/* CORREGIDO: Uso directo del alias de servicio */}
                                 <Form.Control type="number" name="price" value={formData.price ?? 0} onChange={updateFormData} min="1" max={adminProductService.MAX_PRICE_CLP} style={{ backgroundColor: '#333', color: 'white' }} />
                             </Form.Group>
                         </Col>
@@ -480,7 +478,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentP
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label>Estado del Producto</Form.Label>
-                                <Form.Check type="switch" id="product-active-switch" label="Producto Activo" name="isActive" checked={formData.isActive ?? true} onChange={updateFormData} />
+                                <Form.Check type="switch" id="product-active-switch" label="Producto Activo" name="active" checked={formData.active ?? true} onChange={updateFormData} />
                                 <Form.Text className="text-muted">Si está desactivado, no será visible para los clientes.</Form.Text>
                             </Form.Group>
                         </Col>
@@ -525,3 +523,5 @@ const ProductModal: React.FC<ProductModalProps> = ({ show, handleClose, currentP
         </Modal>
     );
 };
+
+export default AdminProductsPage;

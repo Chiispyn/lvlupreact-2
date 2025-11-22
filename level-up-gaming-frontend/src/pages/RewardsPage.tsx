@@ -22,6 +22,10 @@ interface Reward {
   isActive: boolean;
   season: string;
   imageUrl: string;
+  discountType?: string;
+  discountValue?: number;
+  stock?: number | null;
+  stockAvailable?: number | null;
 }
 
 type ProductAddToCartFunction = (product: Product, quantity?: number, isRedeemed?: boolean, pointsCost?: number) => void;
@@ -57,10 +61,13 @@ const RewardRow: React.FC<{
         numReviews: 0,
         isTopSelling: false,
         description: reward.description,
-        category: 'Recompensa', // Añadir la propiedad 'category'
+        category: 'Recompensa',
         reviews: [],
         specifications: JSON.stringify({ Origen: 'Recompensa' }),
-        isActive: false
+        active: false,
+        // 🎯 AGREGAR ESTOS CAMPOS DEL REWARD
+        discountType: (reward as any).discountType,
+        discountValue: (reward as any).discountValue
       };
 
       productAddToCart(mockProduct, 1, true, reward.pointsCost);

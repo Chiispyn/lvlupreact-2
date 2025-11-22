@@ -19,6 +19,8 @@ export interface User {
     address?: UserAddress;
     points: number;
     isActive: boolean;
+    hasDuocDiscount: boolean;
+    referralCode?: string;
     createdAt?: string;
 }
 
@@ -39,4 +41,5 @@ export interface UserUpdatePayload {
     role?: UserRole;
     age?: number;
     address?: UserAddress;
+    hasDuocDiscount?: boolean;
 }

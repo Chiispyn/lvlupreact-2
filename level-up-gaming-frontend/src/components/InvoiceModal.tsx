@@ -5,8 +5,9 @@ import { Modal, Button, ListGroup, Alert } from 'react-bootstrap';
 import { Download } from 'react-feather';
 
 // Interfaces (pueden necesitar ser importadas desde un archivo de tipos central)
+// Interfaces (pueden necesitar ser importadas desde un archivo de tipos central)
 interface ShippingAddress { street: string; city: string; region: string; zipCode?: string; }
-interface CartItem { product: { name: string; price: number }; quantity: number; }
+interface CartItem { name: string; price: number; quantity: number; qty?: number; }
 
 // Props del Modal
 interface InvoiceModalProps {
@@ -64,9 +65,9 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({ show, handleClose, order, s
                 <ListGroup className="mb-4">
                     {order.items.map((item, index) => (
                         <ListGroup.Item key={index} className="d-flex justify-content-between" style={{ backgroundColor: 'transparent', color: 'white', borderBottomColor: '#333' }}>
-                            <span>{item.product.name}</span>
-                            <strong>x{item.quantity}</strong>
-                            <span style={{ color: '#39FF14' }}>{formatClp(item.product.price * item.quantity)}</span>
+                            <span>{item.name}</span>
+                            <strong>x{item.quantity || item.qty}</strong>
+                            <span style={{ color: '#39FF14' }}>{formatClp(item.price * (item.quantity || item.qty || 1))}</span>
                         </ListGroup.Item>
                     ))}
                 </ListGroup>

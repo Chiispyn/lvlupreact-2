@@ -12,7 +12,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
       },
@@ -37,7 +37,7 @@ export default defineConfig({
       provider: 'v8', // Usa el motor V8 de Node (más rápido)
       reporter: ['text', 'html', 'lcov'], // genera consola + HTML navegable
       reportsDirectory: './coverage', // carpeta de salida
-    
+
     },
   },
 });

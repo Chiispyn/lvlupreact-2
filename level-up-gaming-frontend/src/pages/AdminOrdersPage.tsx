@@ -366,10 +366,10 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                         <ListGroup.Item key={i}
                             style={{ backgroundColor: '#222', color: 'white', borderBottom: '1px dashed #444' }}>
                             <div className="d-flex justify-content-between">
-                                <span>{item.product.name}</span>
-                                <strong>x{item.quantity}</strong>
+                                <span>{item.name}</span>
+                                <strong>x{item.quantity || item.qty}</strong>
                                 <span style={{ color: '#39FF14' }}>
-                                    {formatClp(item.product.price * item.quantity)}
+                                    {formatClp((item.price || 0) * (item.quantity || item.qty))}
                                 </span>
                             </div>
                         </ListGroup.Item>
