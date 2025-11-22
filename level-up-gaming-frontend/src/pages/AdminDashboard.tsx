@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../layouts/AdminLayout';
 import { Row, Col, Card, Alert, Spinner } from 'react-bootstrap';
-import { Users, Package, ShoppingCart, BookOpen, Settings, MapPin, Video, DollarSign, AlertTriangle, Award } from 'react-feather'; 
+import { Users, Package, ShoppingCart, BookOpen, Settings, MapPin, Video, DollarSign, AlertTriangle, Award } from 'react-feather';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
@@ -31,9 +31,9 @@ const CRITICAL_STOCK_LEVEL = 5;
 // AdminCard actualizado con data-testid
 const AdminCard: React.FC<{ title: string; icon: React.ReactNode; to: string; testId?: string }> = ({ title, icon, to, testId }) => (
     <Col xs={12} md={6} lg={4} className="mb-4">
-        <Card 
-            data-testid={testId} 
-            className="h-100 shadow-sm border-0 text-center" 
+        <Card
+            data-testid={testId}
+            className="h-100 shadow-sm border-0 text-center"
             style={{ backgroundColor: '#111', border: '1px solid #1E90FF', color: 'white' }}
         >
             <Card.Body>
@@ -56,12 +56,12 @@ const AdminDashboard: React.FC = () => {
 
     const fetchStockStatus = async () => {
         try {
-            const { data } = await axios.get(API_URL_PRODUCTS); 
+            const { data } = await axios.get(API_URL_PRODUCTS);
             const lowStock = data.filter((p: Product) => p.countInStock <= CRITICAL_STOCK_LEVEL);
             setLowStockItems(lowStock);
         } catch (error) {
             console.error("Fallo al verificar el stock.");
-        } 
+        }
     };
 
     const fetchAnalytics = async () => {
@@ -78,8 +78,8 @@ const AdminDashboard: React.FC = () => {
                 if (order.createdAt.slice(0, 10) === today) ordersCountToday++;
 
                 order.items.forEach(item => {
-                    const itemName = item.product.name;
-                    productSales[itemName] = (productSales[itemName] || 0) + item.quantity;
+                    const itemName = item.name;
+                    productSales[itemName] = (productSales[itemName] || 0) + (item.quantity || item.qty);
                 });
             });
 
@@ -100,10 +100,10 @@ const AdminDashboard: React.FC = () => {
             setTopSellingProductName('Error de carga');
             console.error("Fallo al cargar la analítica:", error);
         } finally {
-            setLoadingStock(false); 
+            setLoadingStock(false);
         }
     };
-    
+
     useEffect(() => {
         fetchStockStatus();
         fetchAnalytics();
@@ -112,14 +112,14 @@ const AdminDashboard: React.FC = () => {
     return (
         <AdminLayout>
             <h1 className="text-center mb-5 display-4" style={{ color: '#1E90FF' }}>
-                <Settings className="me-3" size={36}/> Panel de Administración
+                <Settings className="me-3" size={36} /> Panel de Administración
             </h1>
-            
+
             {lowStockItems.length > 0 && !loadingStock && (
                 <Alert variant="danger" className="mb-4 d-flex align-items-center justify-content-between" data-testid="alert-low-stock">
                     <div className="d-flex align-items-center">
-                        <AlertTriangle size={24} className="me-3"/>
-                        <strong>ALERTA DE INVENTARIO:</strong> {lowStockItems.length} producto(s) están por debajo de {CRITICAL_STOCK_LEVEL} unidades. 
+                        <AlertTriangle size={24} className="me-3" />
+                        <strong>ALERTA DE INVENTARIO:</strong> {lowStockItems.length} producto(s) están por debajo de {CRITICAL_STOCK_LEVEL} unidades.
                     </div>
                     <Link to="/admin/products" className="btn btn-sm btn-outline-danger">Gestionar Stock</Link>
                 </Alert>
@@ -130,10 +130,10 @@ const AdminDashboard: React.FC = () => {
                 <Col md={4} className="mb-3">
                     <Card data-testid="card-total-revenue" style={{ backgroundColor: '#222', border: '1px solid #39FF14', color: 'white' }}>
                         <Card.Body>
-                            <DollarSign size={24} style={{ color: '#39FF14' }}/>
+                            <DollarSign size={24} style={{ color: '#39FF14' }} />
                             <Card.Title className="mt-2" style={{ color: 'var(--color-gris-claro)' }}>Ingresos Totales</Card.Title>
                             <div className="display-6" style={{ color: '#1E90FF' }}>
-                                {loadingStock ? <Spinner animation="border" size="sm"/> : formatClp(totalRevenue)}
+                                {loadingStock ? <Spinner animation="border" size="sm" /> : formatClp(totalRevenue)}
                             </div>
                         </Card.Body>
                     </Card>
@@ -141,10 +141,10 @@ const AdminDashboard: React.FC = () => {
                 <Col md={4} className="mb-3">
                     <Card data-testid="card-orders-today" style={{ backgroundColor: '#222', border: '1px solid #1E90FF', color: 'white' }}>
                         <Card.Body>
-                            <ShoppingCart size={24} style={{ color: '#1E90FF' }}/>
+                            <ShoppingCart size={24} style={{ color: '#1E90FF' }} />
                             <Card.Title className="mt-2" style={{ color: 'var(--color-gris-claro)' }}>Órdenes Nuevas (Hoy)</Card.Title>
                             <div className="display-6" style={{ color: '#39FF14' }}>
-                                {loadingStock ? <Spinner animation="border" size="sm"/> : ordersToday}
+                                {loadingStock ? <Spinner animation="border" size="sm" /> : ordersToday}
                             </div>
                         </Card.Body>
                     </Card>
@@ -152,10 +152,10 @@ const AdminDashboard: React.FC = () => {
                 <Col md={4} className="mb-3">
                     <Card data-testid="card-top-product" style={{ backgroundColor: '#222', border: '1px solid #1E90FF', color: 'white' }}>
                         <Card.Body>
-                            <Package size={24} style={{ color: '#39FF14' }}/>
+                            <Package size={24} style={{ color: '#39FF14' }} />
                             <Card.Title className="mt-2" style={{ color: 'var(--color-gris-claro)' }}>Producto Más Vendido</Card.Title>
                             <div className="lead" style={{ color: '#1E90FF', fontWeight: 'bold' }}>
-                                {loadingStock ? <Spinner animation="border" size="sm"/> : topSellingProductName}
+                                {loadingStock ? <Spinner animation="border" size="sm" /> : topSellingProductName}
                             </div>
                         </Card.Body>
                     </Card>

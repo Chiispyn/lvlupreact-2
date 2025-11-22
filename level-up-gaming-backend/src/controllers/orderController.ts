@@ -1,6 +1,7 @@
 // level-up-gaming-backend/src/controllers/orderController.ts
 
 import { type Request, type Response } from 'express';
+import { type AuthRequest } from '../middleware/authMiddleware';
 import { type Order } from '../data/orderData';
 import { type User } from '../data/userData';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,8 +11,9 @@ import { readFromDb, writeToDb } from '../utils/dbUtils';
 // LÓGICA DE CREACIÓN Y LECTURA DE ÓRDENES
 // ----------------------------------------------------
 
-const addOrderItems = (req: Request, res: Response) => {
-    const { userId, items, shippingAddress, paymentMethod, totalPrice, shippingPrice } = req.body;
+const addOrderItems = (req: AuthRequest, res: Response) => {
+    const { items, shippingAddress, paymentMethod, totalPrice, shippingPrice } = req.body;
+    const userId = req.user?.id;
 
     if (!items || items.length === 0) {
         return res.status(400).json({ message: 'No hay artículos en la orden.' });
@@ -33,8 +35,8 @@ const addOrderItems = (req: Request, res: Response) => {
         paymentMethod: paymentMethod,
         totalPrice: totalPrice,
         shippingPrice: shippingPrice,
-        isPaid: true, 
-        status: 'Pendiente', 
+        isPaid: true,
+        status: 'Pendiente',
         createdAt: new Date().toISOString(),
     };
     console.log('Type of orders before push:', typeof orders, 'Value:', orders);
@@ -55,20 +57,18 @@ const addOrderItems = (req: Request, res: Response) => {
             }
         }
     } catch (error) {
-        // Si falla la asignación de puntos, la orden ya fue creada.
-        // Se puede registrar el error para una revisión manual.
         console.error(`Error al asignar puntos al usuario ${userId} por la orden ${newOrder.id}:`, error);
     }
 
     res.status(201).json(newOrder);
 };
 
-const getMyOrders = (req: Request, res: Response) => {
-    const userIdToFilter = req.query.userId; 
+const getMyOrders = (req: AuthRequest, res: Response) => {
+    const userIdToFilter = req.user?.id;
     const orders = readFromDb<Order>('orders');
 
     if (!userIdToFilter) {
-        return res.json([]);
+        return res.status(401).json({ message: 'No autorizado' });
     }
 
     const userOrders = orders.filter(order => order.userId === userIdToFilter);

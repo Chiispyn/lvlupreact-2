@@ -1,6 +1,6 @@
 // level-up-gaming-frontend/src/services/OrderService.ts
 
-import axios from 'axios';
+import axios from './axiosConfig';
 import { Order, OrderUpdatePayload } from '../types/Order';
 import { API_ENDPOINTS } from './api.config';
 
@@ -13,7 +13,7 @@ export const OrderService = {
      */
     async fetchMyOrders(): Promise<Order[]> {
         try {
-            const { data } = await axios.get(`${API_ENDPOINTS.ORDERS}/my-orders`);
+            const { data } = await axios.get(`${API_ENDPOINTS.ORDERS}/myorders`);
             return Array.isArray(data) ? data.reverse() : [];
         } catch (error) {
             throw new Error('Error al cargar tus órdenes.');

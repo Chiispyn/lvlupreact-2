@@ -1,6 +1,6 @@
 // level-up-gaming-frontend/src/services/AdminUserService.ts
 
-import axios from 'axios';
+import axios from './axiosConfig';
 import { User, UserCreatePayload, UserUpdatePayload } from '../types/User';
 import { API_ENDPOINTS } from './api.config';
 

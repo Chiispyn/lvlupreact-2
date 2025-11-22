@@ -10,24 +10,24 @@ export const apiClient = axios.create({
 });
 
 // 1. Definición de Tipos de Dirección y Usuario
-interface Address { 
-    street: string; 
-    city: string; 
-    region: string; 
-    zipCode?: string; 
+interface Address {
+    street: string;
+    city: string;
+    region: string;
+    zipCode?: string;
 }
 
 export interface User {
-    id: string; 
-    name: string; 
-    email: string; 
-    rut: string; 
+    id: string;
+    name: string;
+    email: string;
+    rut: string;
     age: number;
-    role: 'admin' | 'customer' | 'seller'; 
-    token: string; 
+    role: 'admin' | 'customer' | 'seller';
+    token: string;
     hasDuocDiscount: boolean;
-    points: number; 
-    referralCode: string; 
+    points: number;
+    referralCode: string;
     address: Address; // 🚨 Incluido para la gestión de envío
 }
 
@@ -39,7 +39,7 @@ interface AuthContextType {
     register: (name: string, email: string, password: string) => Promise<boolean>;
     updateProfile: (userData: Partial<User>) => Promise<boolean>;
     // 🚨 Función para guardar el usuario tras registro o actualización de perfil (PUT)
-    setUserFromRegistration: (userData: User) => void; 
+    setUserFromRegistration: (userData: User) => void;
 }
 
 // 2. Creación del Contexto
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const storedUser = localStorage.getItem('user');
         return storedUser ? JSON.parse(storedUser) : null;
     });
-    
+
     const isLoggedIn = !!user;
 
     // Persistir el usuario en localStorage cada vez que cambie
@@ -75,10 +75,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Función de Login que llama a la API de tu Backend
     const login = async (loginIdentifier: string, password: string): Promise<boolean> => {
         try {
-            // Usa el identificador para login (email o nombre)
-            const res = await apiClient.post('/users/login', { loginIdentifier, password }); // Use apiClient
+            // Send 'email' to match backend's LoginRequest DTO
+            const res = await apiClient.post('/users/login', { email: loginIdentifier, password }); // Use apiClient
             const userData: User = res.data;
-            
+
             setUser(userData);
             apiClient.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`; // Set for apiClient
             return true;
@@ -134,7 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logout,
         register,
         updateProfile,
-        setUserFromRegistration, 
+        setUserFromRegistration,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

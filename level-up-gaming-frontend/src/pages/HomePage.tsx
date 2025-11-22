@@ -68,7 +68,7 @@ const HomePage: React.FC = () => {
                 const response = await fetch('/api/products/top'); 
                 const data: Product[] = await response.json();
                 // 🚨 CAMBIO CLAVE: Filtrar para mostrar solo productos activos
-                const activeTopProducts = data.filter(product => product.isActive);
+                const activeTopProducts = data.filter(product => product.active);
                 setTopProducts(activeTopProducts);
             } catch (error) {
                 console.error("Error al cargar productos destacados:", error);

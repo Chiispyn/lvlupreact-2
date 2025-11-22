@@ -16,16 +16,20 @@ export interface Product {
     description: string;
     price: number; // Precio en CLP
     imageUrl: string;
-    rating: number; 
+    rating: number;
     numReviews: number;
     isTopSelling: boolean;
     countInStock: number;
-    
+
     // Campos añadidos
     specifications: string; // Datos técnicos (JSON string)
-    category: string; 
+    category: string;
     reviews: Review[]; // Lista de comentarios para la página de detalle
-    isActive: boolean;
+    active: boolean; // Changed from isActive - Jackson serializes boolean isActive as "active" in JSON
+
+    // Campos opcionales para rewards (cuando se usan como mock products)
+    discountType?: string;
+    discountValue?: number;
 }
 
 // Payload para crear/actualizar productos
@@ -40,7 +44,7 @@ export interface ProductPayload {
     isTopSelling?: boolean;
     rating?: number;
     numReviews?: number;
-    isActive?: boolean;
+    active?: boolean; // Backend uses active
 }
 
 // Estado para mensajes de estado

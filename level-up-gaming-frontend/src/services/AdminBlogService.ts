@@ -1,6 +1,6 @@
 // level-up-gaming-frontend/src/services/AdminBlogService.ts
 
-import axios from 'axios';
+import axios from './axiosConfig';
 import { BlogPost, PostFormData } from '../types/Blog';
 import { API_ENDPOINTS } from './api.config';
 

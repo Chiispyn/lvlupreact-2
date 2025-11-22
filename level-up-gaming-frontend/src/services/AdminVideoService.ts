@@ -1,6 +1,6 @@
 // level-up-gaming-frontend/src/services/AdminVideoService.ts
 
-import axios from 'axios';
+import axios from './axiosConfig';
 import { Video, VideoFormData } from '../types/Video';
 import { API_ENDPOINTS } from './api.config';
 
@@ -25,7 +25,7 @@ export const AdminVideoService = {
      */
     async createVideo(payload: VideoFormData): Promise<Video> {
         try {
-            const { data } = await axios.post(`${API_ENDPOINTS.VIDEOS}/admin`, payload);
+            const { data } = await axios.post(API_ENDPOINTS.VIDEOS, payload);
             return data;
         } catch (error: any) {
             throw error;
@@ -37,7 +37,7 @@ export const AdminVideoService = {
      */
     async updateVideo(videoId: string, payload: VideoFormData): Promise<Video> {
         try {
-            const { data } = await axios.put(`${API_ENDPOINTS.VIDEOS}/${videoId}/admin`, payload);
+            const { data } = await axios.put(`${API_ENDPOINTS.VIDEOS}/${videoId}`, payload);
             return data;
         } catch (error: any) {
             throw error;
@@ -49,7 +49,7 @@ export const AdminVideoService = {
      */
     async deleteVideo(videoId: string): Promise<void> {
         try {
-            await axios.delete(`${API_ENDPOINTS.VIDEOS}/${videoId}/admin`);
+            await axios.delete(`${API_ENDPOINTS.VIDEOS}/${videoId}`);
         } catch (error) {
             throw new Error('Fallo al eliminar el video.');
         }
@@ -58,9 +58,9 @@ export const AdminVideoService = {
     /**
      * Toggle del estado destacado (featured) de un video
      */
-    async toggleVideoFeaturedStatus(videoId: string): Promise<Video> {
+    async toggleVideoFeaturedStatus(videoId: string, isFeatured: boolean): Promise<Video> {
         try {
-            const { data } = await axios.put(`${API_ENDPOINTS.VIDEOS}/${videoId}/feature`);
+            const { data } = await axios.put(`${API_ENDPOINTS.VIDEOS}/${videoId}`, { isFeatured });
             return data;
         } catch (error) {
             throw new Error('Fallo al actualizar el estado destacado del video.');

@@ -1,6 +1,6 @@
 // level-up-gaming-frontend/src/services/AdminProductService.ts
 
-import axios from 'axios';
+import axios from './axiosConfig';
 import { Product, ProductPayload } from '../types/Product';
 import { API_ENDPOINTS } from './api.config';
 import { PRODUCT_CATEGORIES, MAX_PRODUCT_STOCK, MAX_PRODUCT_PRICE_CLP } from '../utils/constants';
@@ -26,7 +26,7 @@ export const AdminProductService = {
      */
     async fetchProducts(): Promise<Product[]> {
         try {
-            const { data } = await axios.get(API_ENDPOINTS.PRODUCTS);
+            const { data } = await axios.get(`${API_ENDPOINTS.PRODUCTS}?admin=true`);
             return Array.isArray(data) ? data : [];
         } catch (error) {
             throw new Error('No se pudo cargar la lista de productos.');
@@ -60,9 +60,9 @@ export const AdminProductService = {
     /**
      * Activa o desactiva un producto
      */
-    async toggleProductActiveStatus(productId: string, isActive: boolean): Promise<Product> {
+    async toggleProductActiveStatus(productId: string, active: boolean): Promise<Product> {
         try {
-            const { data } = await axios.put(`${API_ENDPOINTS.PRODUCTS}/${productId}`, { isActive });
+            const { data } = await axios.put(`${API_ENDPOINTS.PRODUCTS}/${productId}`, { active });
             return data;
         } catch (error) {
             throw new Error('Fallo al cambiar el estado del producto.');

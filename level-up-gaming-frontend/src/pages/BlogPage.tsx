@@ -45,12 +45,12 @@ const BlogPage: React.FC = () => {
     return (
         <Container className="py-5">
             <h1 className="text-center mb-5 display-4" style={{ color: '#1E90FF' }}>
-                <BookOpen className="me-3" size={36}/> Blog Gamer Level-Up
+                <BookOpen className="me-3" size={36} /> Blog Gamer Level-Up
             </h1>
             <p className="text-center lead mb-5 text-muted">
                 Noticias, guías de hardware y análisis profundos para llevar tu experiencia al siguiente nivel.
             </p>
-            
+
             {posts.length === 0 ? (
                 <Alert variant="info" style={{ backgroundColor: '#333', border: '1px solid #1E90FF', color: 'white' }}>
                     No hay artículos publicados en este momento. ¡El administrador debe crear contenido!
