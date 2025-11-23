@@ -11,5 +11,6 @@ public class EventUpdateDTO {
     private LocalTime time;
     private String location;
     private String mapEmbed;
+    private String mapUrl;
     private String notes;
 }

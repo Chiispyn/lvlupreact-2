@@ -246,12 +246,12 @@ public class DataSeeder implements CommandLineRunner {
                                         LocalDate.parse("2025-11-10"), LocalTime.parse("18:00"),
                                         "Auditorio Duoc UC Sede Concepción",
                                         "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3192.179836934415!2d-73.0647610255395!3d-36.79547359546272!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9669b61405e6b0a7%3A0xf6398909890a5d5!2sAuditorio%20Duoc%20UC!5e0!3m2!1ses-419!2scl!4v1678822000000!5m2!1ses-419!2scl",
-                                        "auditorio edificio H");
+                                        "https://maps.app.goo.gl/KBTshwDxYdhYiSCv9","auditorio edificio H");
                         Event e2 = new Event("e2", "Feria de Tecnología Gaming (LAN Party)",
                                         LocalDate.parse("2025-12-05"), LocalTime.parse("10:00"),
                                         "Concepción, Biobío",
                                         "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3195.110940546598!2d-73.06995842344165!3d-36.79189037633242!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9669b5cb2968bf95%3A0x7d07bcc487791544!2sMovistar%20GameClub%20%E2%80%94%20Mallplaza%20Tr%C3%A9bol!5e0!3m2!1ses!2scl!4v1762516143907!5m2!1ses!2scl",
-                                        "Movistar Gamingclub mall del trebol");
+                                        "https://maps.app.goo.gl/j5wFHYX4XuRDC9ho9","Movistar Gamingclub mall del trebol");
                         eventRepository.saveAll(Arrays.asList(e1, e2));
                         System.out.println("Events seeded successfully!");
                 }

@@ -21,5 +21,6 @@ public class Event {
     private String location;
     @Column(length = 1000)
     private String mapEmbed;
+    private String mapUrl;
     private String notes;
 }

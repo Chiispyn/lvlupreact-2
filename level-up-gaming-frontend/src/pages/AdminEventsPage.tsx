@@ -16,6 +16,7 @@ interface Event {
     time: string; // HH:MM
     location: string;
     mapEmbed: string;
+    mapUrl?: string; // 🚨 NUEVO: URL para el botón "Ver Mapa"
     notes?: string;
 }
 
@@ -342,6 +343,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, show, handleClose, fetch
         time: event?.time || '18:00',
         location: event?.location || '', // Comuna, Región (Se auto-genera)
         mapEmbed: event?.mapEmbed || '', 
+        mapUrl: event?.mapUrl || '', // 🚨 NUEVO
         notes: event?.notes || '', // Notas logísticas
     });
     const [loading, setLoading] = useState(false);
@@ -375,11 +377,11 @@ const EventModal: React.FC<EventModalProps> = ({ event, show, handleClose, fetch
             const locationParts = event.location.includes(',') ? event.location.split(',').map(s => s.trim()) : [event.location, ''];
             const [commune, region] = locationParts.length === 2 ? [locationParts[0], locationParts[1]] : ['', locationParts[0]];
             
-            setFormData({ title: event.title, date: event.date, time: event.time, location: event.location, mapEmbed: event.mapEmbed, notes: event.notes || '' });
+            setFormData({ title: event.title, date: event.date, time: event.time, location: event.location, mapEmbed: event.mapEmbed, mapUrl: event.mapUrl || '', notes: event.notes || '' });
             setRegionSelected(region || event.location);
             setCommuneSelected(commune || '');
         } else {
-            setFormData({ title: '', date: today, time: '18:00', location: '', mapEmbed: '', notes: '' });
+            setFormData({ title: '', date: today, time: '18:00', location: '', mapEmbed: '', mapUrl: '', notes: '' });
             setRegionSelected('');
             setCommuneSelected('');
         }
@@ -570,6 +572,21 @@ const EventModal: React.FC<EventModalProps> = ({ event, show, handleClose, fetch
                         </Form.Text>
                     </Form.Group>
                     
+                    {/* 🚨 NUEVO CAMPO: URL para el botón "Ver Mapa" */}
+                    <Form.Group className="mb-3">
+                        <Form.Label>URL para el botón "Ver Mapa"</Form.Label>
+                        <Form.Control 
+                            type="url" 
+                            name="mapUrl" 
+                            value={formData.mapUrl} 
+                            onChange={updateFormData} 
+                            style={{ backgroundColor: '#333', color: 'white' }}
+                        />
+                        <Form.Text className="text-muted">
+                            **Paso:** Pegue aquí la URL que se abrirá en una nueva pestaña (ej: enlace de Google Maps).
+                        </Form.Text>
+                    </Form.Group>
+
                     <Button type="submit" variant="success" className="w-100 mt-3" disabled={loading}>
                         {loading ? 'Guardando...' : (isEditing ? 'Guardar Cambios' : 'Crear Evento')}
                     </Button>
