@@ -21,6 +21,13 @@ public class BlogController {
         return blogRepository.findAll();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Blog> getBlogById(@PathVariable String id) {
+        return blogRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/admin")
     public ResponseEntity<Blog> createPost(@RequestBody Blog blog) {
         if (blog.getId() == null) {

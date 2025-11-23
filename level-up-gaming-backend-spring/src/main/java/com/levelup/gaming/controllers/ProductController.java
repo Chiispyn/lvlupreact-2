@@ -1,11 +1,13 @@
 package com.levelup.gaming.controllers;
 
 import com.levelup.gaming.models.Product;
+import com.levelup.gaming.models.Review;
 import com.levelup.gaming.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -87,5 +89,37 @@ public class ProductController {
         }
         Product saved = productRepository.save(product);
         return ResponseEntity.ok(saved);
+    }
+
+    @PostMapping("/{id}/reviews")
+    public ResponseEntity<Product> createReview(@PathVariable String id,
+            @RequestBody com.levelup.gaming.dto.ReviewCreateDTO reviewDTO) {
+        return productRepository.findById(id)
+                .map(product -> {
+                    // Create new review
+                    Review newReview = new Review();
+                    newReview.setId(java.util.UUID.randomUUID().toString());
+                    newReview.setName(reviewDTO.getName());
+                    newReview.setRating(reviewDTO.getRating());
+                    newReview.setComment(reviewDTO.getComment());
+                    newReview.setCreatedAt(LocalDateTime.now());
+
+                    // Add review to product
+                    product.getReviews().add(newReview);
+
+                    // Recalculate rating and review count
+                    int totalReviews = product.getReviews().size();
+                    double averageRating = product.getReviews().stream()
+                            .mapToInt(Review::getRating)
+                            .average()
+                            .orElse(0.0);
+
+                    product.setNumReviews(totalReviews);
+                    product.setRating(Math.round(averageRating * 10.0) / 10.0); // Round to 1 decimal
+
+                    Product saved = productRepository.save(product);
+                    return ResponseEntity.ok(saved);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }

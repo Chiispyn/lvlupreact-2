@@ -3,11 +3,11 @@ import { Container, Row, Col, Spinner, Alert, Image, Button, Badge, ListGroup } 
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import ReviewsSection from '../components/ReviewsSection'; 
-import { Product, Review } from '../types/Product';
+import ReviewsSection from '../components/ReviewsSection';
+import { Product } from '../types/Product';
 import { ShoppingCart, Star, ArrowLeft } from 'react-feather';
-import { useCart } from '../context/CartContext'; 
-import { useAuth } from '../context/AuthContext'; 
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const API_URL = '/api/products';
 
@@ -20,9 +20,9 @@ const CLP_FORMATTER = new Intl.NumberFormat('es-CL', {
 const formatClp = (amount: number) => CLP_FORMATTER.format(amount);
 
 const ProductDetailPage: React.FC = () => {
-    const { id } = useParams<{ id: string }>(); 
+    const { id } = useParams<{ id: string }>();
     const { addToCart } = useCart();
-    const { user } = useAuth(); 
+    const { user } = useAuth();
 
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
@@ -47,28 +47,25 @@ const ProductDetailPage: React.FC = () => {
         fetchProduct();
     }, [id]);
 
-    const addReviewToProduct = (newRating: number, newComment: string) => {
+    const addReviewToProduct = async (newRating: number, newComment: string) => {
         if (!product) return;
-        
-        const newReview: Review = {
-            id: Date.now().toString(),
-            name: user?.name || 'Usuario Anónimo',
-            rating: newRating,
-            comment: newComment,
-            createdAt: new Date().toISOString(),
-        };
-        
-        const updatedReviews = [newReview, ...product.reviews];
-        const newNumReviews = product.numReviews + 1;
-        const totalRating = (product.rating * product.numReviews) + newRating;
-        const newAverageRating = totalRating / newNumReviews;
 
-        setProduct({
-            ...product,
-            reviews: updatedReviews,
-            numReviews: newNumReviews,
-            rating: newAverageRating,
-        });
+        try {
+            const reviewPayload = {
+                name: user?.name || 'Usuario Anónimo',
+                rating: newRating,
+                comment: newComment
+            };
+
+            const response = await axios.post(`${API_URL}/${product.id}/reviews`, reviewPayload);
+
+            // Update product with response from backend (includes updated rating and review count)
+            setProduct(response.data);
+            toast.success('¡Reseña publicada con éxito!');
+        } catch (error: any) {
+            console.error('Error al enviar la reseña:', error);
+            toast.error('No se pudo publicar la reseña. Intenta nuevamente.');
+        }
     };
 
     if (loading) return <Container className="py-5 text-center"><Spinner animation="border" /></Container>;
@@ -114,18 +111,18 @@ const ProductDetailPage: React.FC = () => {
         <Container className="py-5">
             <Link to="/productos" className="text-decoration-none">
                 <Button variant="outline-secondary" size="sm" className="mb-4">
-                    <ArrowLeft size={16} className="me-2"/> Volver al Catálogo
+                    <ArrowLeft size={16} className="me-2" /> Volver al Catálogo
                 </Button>
             </Link>
 
             <Row>
                 {/* Columna de Imagen */}
                 <Col md={6}>
-                    <Image 
-                        src={imageError ? 'https://via.placeholder.com/600x400?text=IMAGEN+NO+DISPONIBLE' : product.imageUrl} 
-                        alt={product.name} 
-                        fluid 
-                        rounded 
+                    <Image
+                        src={imageError ? 'https://via.placeholder.com/600x400?text=IMAGEN+NO+DISPONIBLE' : product.imageUrl}
+                        alt={product.name}
+                        fluid
+                        rounded
                         className="shadow-lg"
                         onError={() => setImageError(true)}
                     />
@@ -143,13 +140,13 @@ const ProductDetailPage: React.FC = () => {
                             <Badge bg={product.countInStock > 0 ? 'success' : 'danger'} className="fs-6">
                                 {product.countInStock > 0 ? `${product.countInStock} en Stock` : 'Agotado'}
                             </Badge>
-                            <Button 
-                                variant="success" 
-                                size="lg" 
+                            <Button
+                                variant="success"
+                                size="lg"
                                 onClick={handleAddToCart}
                                 disabled={product.countInStock === 0 || addedToCart} // Bloquea el botón si ya fue añadido
                             >
-                                <ShoppingCart size={20} className="me-2"/>
+                                <ShoppingCart size={20} className="me-2" />
                                 {addedToCart ? 'Producto Añadido' : 'Añadir al Carrito'}
                             </Button>
                         </div>
@@ -164,12 +161,12 @@ const ProductDetailPage: React.FC = () => {
                 </Col>
             </Row>
 
-            <ReviewsSection 
+            <ReviewsSection
                 productId={product.id}
                 averageRating={product.rating}
                 numReviews={product.numReviews}
                 reviews={product.reviews}
-                onReviewSubmit={addReviewToProduct} 
+                onReviewSubmit={addReviewToProduct}
             />
         </Container>
     );
