@@ -11,6 +11,7 @@ D:\Escritorio\LvUP\lvlupreact-2\level-up-gaming-backend-spring\src\main\java\com
 D:\Escritorio\LvUP\lvlupreact-2\level-up-gaming-backend-spring\src\main\java\com\levelup\gaming\models\Video.java
 D:\Escritorio\LvUP\lvlupreact-2\level-up-gaming-backend-spring\src\main\java\com\levelup\gaming\repositories\UserRepository.java
 D:\Escritorio\LvUP\lvlupreact-2\level-up-gaming-backend-spring\src\main\java\com\levelup\gaming\LevelUpGamingApplication.java
+D:\Escritorio\LvUP\lvlupreact-2\level-up-gaming-backend-spring\src\main\java\com\levelup\gaming\dto\ReviewCreateDTO.java
 D:\Escritorio\LvUP\lvlupreact-2\level-up-gaming-backend-spring\src\main\java\com\levelup\gaming\models\OrderItem.java
 D:\Escritorio\LvUP\lvlupreact-2\level-up-gaming-backend-spring\src\main\java\com\levelup\gaming\dto\BlogUpdateDTO.java
 D:\Escritorio\LvUP\lvlupreact-2\level-up-gaming-backend-spring\src\main\java\com\levelup\gaming\models\Event.java

@@ -15,6 +15,7 @@ interface Event {
     time: string; // HH:MM
     location: string;
     mapEmbed: string;
+    mapUrl : string;
     notes?: string; // 🚨 NUEVO CAMPO DE NOTAS
 }
 
@@ -59,6 +60,7 @@ const CommunityPage: React.FC = () => {
     const fetchEvents = async () => {
         try {
             const { data } = await axios.get(API_URL); 
+            console.log('Eventos recibidos de la API:', data); // <-- AÑADE ESTA LÍNEA PARA DEPURAR
             setEvents(data);
         } catch (err: any) {
             setError('Fallo al cargar los eventos. Intenta recargar la página.');
@@ -126,8 +128,8 @@ const CommunityPage: React.FC = () => {
                                     )}
                                     
                                     <div className="d-flex justify-content-start mt-3">
-                                        {event.mapEmbed && ( 
-                                            <Button variant="primary" size="sm" as="a" href={event.mapEmbed} target="_blank" className="mt-2 me-2">Ver Mapa</Button>
+                                        {event.mapUrl && ( 
+                                            <Button variant="primary" size="sm" as="a" href={event.mapUrl as string} target="_blank" className="mt-2 me-2">Ver Mapa</Button>
                                         )}
                                         {/* 🚨 Botón estático, el admin tiene que ver más detalles desde el panel */}
                                     </div>

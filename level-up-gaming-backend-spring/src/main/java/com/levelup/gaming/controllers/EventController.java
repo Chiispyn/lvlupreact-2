@@ -45,6 +45,8 @@ public class EventController {
                         existingEvent.setLocation(eventUpdate.getLocation());
                     if (eventUpdate.getMapEmbed() != null)
                         existingEvent.setMapEmbed(eventUpdate.getMapEmbed());
+                    if (eventUpdate.getMapUrl() != null)
+                        existingEvent.setMapUrl(eventUpdate.getMapUrl());
                     if (eventUpdate.getNotes() != null)
                         existingEvent.setNotes(eventUpdate.getNotes());
 
