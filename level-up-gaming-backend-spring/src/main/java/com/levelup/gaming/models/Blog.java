@@ -17,8 +17,9 @@ public class Blog {
     private String title;
     @Column(length = 1000)
     private String excerpt;
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
+    @Column(columnDefinition = "LONGTEXT")
     private String imageUrl;
     private String author;
     private LocalDateTime createdAt;

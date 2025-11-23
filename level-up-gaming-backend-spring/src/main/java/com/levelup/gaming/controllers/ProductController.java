@@ -82,6 +82,9 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        if (product.getId() == null) {
+            product.setId(java.util.UUID.randomUUID().toString());
+        }
         Product saved = productRepository.save(product);
         return ResponseEntity.ok(saved);
     }

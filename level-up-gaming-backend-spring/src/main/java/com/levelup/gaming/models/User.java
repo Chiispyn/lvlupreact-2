@@ -22,6 +22,7 @@ public class User {
     private boolean hasDuocDiscount;
     private int points;
     private String referralCode;
+    @com.fasterxml.jackson.annotation.JsonProperty("isActive")
     private boolean isActive;
 
     @Transient

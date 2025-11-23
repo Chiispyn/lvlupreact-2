@@ -137,6 +137,52 @@ public class UserController {
                 .orElse(ResponseEntity.badRequest().body("Correo electrónico no encontrado."));
     }
 
+    @PostMapping("/admin")
+    public ResponseEntity<?> createAdminUser(@RequestBody User user) {
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("El correo electrónico ya está registrado.");
+        }
+
+        user.setId(java.util.UUID.randomUUID().toString());
+
+        // Default values if missing
+        if (user.getRole() == null)
+            user.setRole("user");
+        if (user.getPoints() == 0)
+            user.setPoints(0);
+
+        // Generate referral code
+        String baseCode = user.getName().length() >= 3 ? user.getName().substring(0, 3).toUpperCase() : "USR";
+        String refCode = "REF-" + baseCode + (int) (Math.random() * 10000);
+        user.setReferralCode(refCode);
+        user.setActive(true);
+
+        User savedUser = userRepository.save(user);
+        // Generate token for the new user (optional, but consistent with register)
+        String token = jwtService.generateToken(savedUser.getEmail());
+        savedUser.setToken(token);
+
+        return ResponseEntity.ok(savedUser);
+    }
+
+    @PutMapping("/{id}/admin")
+    public ResponseEntity<?> updateAdminUser(@PathVariable String id, @RequestBody User userUpdates) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    user.setName(userUpdates.getName());
+                    user.setEmail(userUpdates.getEmail());
+                    user.setRut(userUpdates.getRut());
+                    user.setRole(userUpdates.getRole());
+                    user.setAge(userUpdates.getAge());
+                    if (userUpdates.getAddress() != null) {
+                        user.setAddress(userUpdates.getAddress());
+                    }
+                    userRepository.save(user);
+                    return ResponseEntity.ok(user);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @Data
     static class LoginRequest {
         private String email;

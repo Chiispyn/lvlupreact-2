@@ -15,7 +15,10 @@ import java.util.function.Function;
 @Component
 public class JwtService {
 
-    private static final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    // Use a fixed key for development to persist sessions across restarts
+    // In production, this should be in application.properties
+    private static final String SECRET_STRING = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
+    private static final Key SECRET_KEY = Keys.hmacShaKeyFor(io.jsonwebtoken.io.Decoders.BASE64.decode(SECRET_STRING));
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

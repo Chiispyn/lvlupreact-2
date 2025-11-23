@@ -95,13 +95,13 @@ public class SecurityConfig {
 
                         // Admin CRUD operations
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/products/**", "/api/videos/**",
-                                "/api/rewards/**")
+                                "/api/rewards/**", "/api/events/**", "/api/blog/**", "/api/blog/admin")
                         .authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/products/**", "/api/videos/**",
-                                "/api/rewards/**")
+                                "/api/rewards/**", "/api/events/**", "/api/blog/**")
                         .authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/products/**",
-                                "/api/videos/**", "/api/rewards/**")
+                                "/api/videos/**", "/api/rewards/**", "/api/events/**", "/api/blog/**")
                         .authenticated()
 
                         // Specific admin read endpoints

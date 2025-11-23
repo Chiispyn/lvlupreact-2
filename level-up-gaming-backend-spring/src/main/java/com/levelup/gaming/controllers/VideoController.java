@@ -46,6 +46,9 @@ public class VideoController {
 
     @PostMapping
     public ResponseEntity<Video> createVideo(@RequestBody Video video) {
+        if (video.getId() == null) {
+            video.setId(java.util.UUID.randomUUID().toString());
+        }
         Video saved = videoRepository.save(video);
         return ResponseEntity.ok(saved);
     }

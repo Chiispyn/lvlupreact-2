@@ -56,7 +56,7 @@ export const AdminUserService = {
         try {
             const { data } = await axios.put(
                 `${API_ENDPOINTS.USERS}/${userId}/status`,
-                { isActive },
+                { active: isActive },
                 AdminUserService.getAuthConfig()
             );
             return data;

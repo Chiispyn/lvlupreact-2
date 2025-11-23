@@ -182,7 +182,6 @@ const AdminUsersPage: React.FC = () => {
                             <th>Rol</th>
                             <th>Estado</th>
                             <th>Puntos</th>
-                            <th>Descuento</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -297,15 +296,15 @@ const UserEditModal: React.FC<EditModalProps> = ({ user, handleClose, fetchUsers
 
     useEffect(() => {
         if (user) {
-            setFormData({ 
-                name: user.name, 
-                email: user.email, 
-                role: user.role, 
-                rut: user.rut, 
-                age: user.age?.toString() || '0', 
-                street: user.address?.street || '', 
-                city: user.address?.city || '', 
-                region: user.address?.region || '' 
+            setFormData({
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                rut: user.rut,
+                age: user.age?.toString() || '0',
+                street: user.address?.street || '',
+                city: user.address?.city || '',
+                region: user.address?.region || ''
             });
             setError(null);
         }
@@ -339,24 +338,24 @@ const UserEditModal: React.FC<EditModalProps> = ({ user, handleClose, fetchUsers
         // Usamos la función de utilidad refactorizada
         if (!UserUtils.validateRut(formData.rut)) { setError('El RUT ingresado es inválido.'); setLoading(false); return; }
         if (parseInt(formData.age) < 18 || parseInt(formData.age) > 95) { setError('La edad debe estar entre 18 y 95 años.'); setLoading(false); return; }
-        
+
         try {
             // Creamos el payload tipado
-            const payload: UserUpdatePayload = { 
-                name: formData.name, 
-                email: formData.email, 
-                role: formData.role, 
-                rut: formData.rut, 
-                age: parseInt(formData.age), 
-                address: { street: formData.street, city: formData.city, region: formData.region, zipCode: '', } 
+            const payload: UserUpdatePayload = {
+                name: formData.name,
+                email: formData.email,
+                role: formData.role,
+                rut: formData.rut,
+                age: parseInt(formData.age),
+                address: { street: formData.street, city: formData.city, region: formData.region, zipCode: '', }
             };
-            
+
             // Usamos la función de servicio
             await AdminUserService.updateUser(user.id, payload);
             fetchUsers(); handleClose(); showStatus(`Usuario ${user.name} actualizado con éxito.`, 'success');
         } catch (err: any) { setError(err.response?.data?.message || 'Fallo al actualizar el usuario.'); } finally { setLoading(false); }
     };
-    
+
     return (
         <Modal show={!!user} onHide={handleClose} centered size="lg">
             <Modal.Header closeButton style={{ backgroundColor: '#111', borderBottomColor: '#1E90FF' }}><Modal.Title style={{ color: '#1E90FF' }}>Editar Usuario: {user.name}</Modal.Title></Modal.Header>
@@ -456,19 +455,19 @@ const UserCreateModal: React.FC<CreateModalProps> = ({ show, handleClose, fetchU
         if (!UserUtils.validateRut(formData.rut)) { setError('El RUT ingresado es inválido.'); setLoading(false); return; }
         if (parseInt(formData.age) < 18 || parseInt(formData.age) > 95) { setError('La edad debe estar entre 18 y 95 años.'); setLoading(false); return; }
         if (formData.password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres.'); setLoading(false); return; }
-        
+
         try {
             // Creamos el payload tipado correctamente (sin campos de dirección duplicados)
             const { street, city, region, password, ...baseData } = formData;
-            const payload: UserCreatePayload = { 
+            const payload: UserCreatePayload = {
                 ...baseData,
                 password,
-                age: parseInt(formData.age), 
-                address: { street, city, region, zipCode: '' }, 
+                age: parseInt(formData.age),
+                address: { street, city, region, zipCode: '' },
             };
-            
+
             // Enviamos el payload al servicio
-            await AdminUserService.createUser(payload);            fetchUsers(); handleClose(); showStatus(`Usuario ${formData.name} creado con éxito.`, 'success');
+            await AdminUserService.createUser(payload); fetchUsers(); handleClose(); showStatus(`Usuario ${formData.name} creado con éxito.`, 'success');
         } catch (err: any) { setError(err.response?.data?.message || 'Fallo al crear el usuario. El email podría estar duplicado.'); } finally { setLoading(false); }
     };
 

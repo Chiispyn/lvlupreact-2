@@ -25,7 +25,7 @@ export const AdminEventService = {
      */
     async createEvent(payload: EventFormData): Promise<Event> {
         try {
-            const { data } = await axios.post(API_ENDPOINTS.EVENTS, payload);
+            const { data } = await axios.post(`${API_ENDPOINTS.EVENTS}/admin`, payload);
             return data;
         } catch (error: any) {
             throw error;
@@ -37,7 +37,7 @@ export const AdminEventService = {
      */
     async updateEvent(eventId: string, payload: EventFormData): Promise<Event> {
         try {
-            const { data } = await axios.put(`${API_ENDPOINTS.EVENTS}/${eventId}`, payload);
+            const { data } = await axios.put(`${API_ENDPOINTS.EVENTS}/${eventId}/admin`, payload);
             return data;
         } catch (error: any) {
             throw error;
@@ -49,7 +49,7 @@ export const AdminEventService = {
      */
     async deleteEvent(eventId: string): Promise<void> {
         try {
-            await axios.delete(`${API_ENDPOINTS.EVENTS}/${eventId}`);
+            await axios.delete(`${API_ENDPOINTS.EVENTS}/${eventId}/admin`);
         } catch (error) {
             throw new Error('Fallo al eliminar el evento.');
         }
