@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Container, Button, Alert, Spinner } from 'react-bootstrap';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft } from 'react-feather';
-import axios from 'axios';
+import { useParams, Link } from 'react-router-dom'; 
+import { ArrowLeft } from 'react-feather'; 
 
 // Interface (debe coincidir con el Backend)
 interface BlogPost {
@@ -28,11 +27,15 @@ const BlogPostPage: React.FC = () => {
             if (!id) return;
 
             try {
-                // 🚨 LLAMADA A LA API para obtener el post por ID
-                const { data } = await axios.get(`/api/blog/${id}`);
+                // 🚨 CORRECCIÓN: La URL correcta es /api/blog/:id según el Controller.
+                const response = await fetch(`/api/blog/${id}`); 
+                if (!response.ok) {
+                    throw new Error('No se pudo encontrar el artículo.');
+                }
+                const data: BlogPost = await response.json();
                 setPost(data);
             } catch (err: any) {
-                setError('No se pudo encontrar el artículo.');
+                setError(err.message || 'No se pudo encontrar el artículo.');
             } finally {
                 setLoading(false);
             }
@@ -68,9 +71,12 @@ const BlogPostPage: React.FC = () => {
 
             {/* 🚨 RENDERIZADO DEL CONTENIDO COMPLETO */}
             <div 
-                className="blog-content lead text-white" 
+                className="blog-content lead" 
                 // Inyecta el contenido HTML guardado en el Backend
                 dangerouslySetInnerHTML={{ __html: post.content }} 
+                // 🚨 CORRECCIÓN: Se asegura que el texto sea legible, ya que el HTML
+                // del backend puede tener clases como 'text-white'.
+                style={{ color: 'var(--color-gris-claro)' }}
             />
 
             <footer className="mt-5 pt-3 border-top">
