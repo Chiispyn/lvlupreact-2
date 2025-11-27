@@ -17,6 +17,11 @@ const localStorageMock = (() => {
 })();
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
+// Mock de AuthContext
+vi.mock('../../src/context/AuthContext', () => ({
+    useAuth: vi.fn(() => ({ user: null })), // Por defecto usuario invitado
+}));
+
 // Componente Wrapper para el hook
 const MockWrapper = ({ children }: { children: ReactNode }) => (
     <CartProvider>{children}</CartProvider>
@@ -24,7 +29,7 @@ const MockWrapper = ({ children }: { children: ReactNode }) => (
 
 // 🚨 CORRECCIÓN CRÍTICA: Definiciones de productos COMPLETAS para la interfaz Product
 
-const createMockProduct = (id: string, name: string, price: number, countInStock: number, isRedeemed = false): Product => ({
+const createMockProduct = (id: string, name: string, price: number, countInStock: number): Product => ({
     id: id,
     name: name,
     description: `Descripción para ${name}`,
@@ -38,14 +43,14 @@ const createMockProduct = (id: string, name: string, price: number, countInStock
     specifications: '{}',
     category: 'Consolas',
     reviews: [],
-    isActive: false
+    active: false
 });
 
 
 const mockProductA: Product = createMockProduct('p1', 'Product A', 10000, 5);
 const mockProductB: Product = createMockProduct('p2', 'Product B', 50000, 2);
 const mockRedeemed: Product = {
-    ...createMockProduct('r1', '[CANJE] Recompensa', 0, 1, true),
+    ...createMockProduct('r1', '[CANJE] Recompensa', 0, 1),
     reviews: [],
     category: 'Reward',
     specifications: '{}',
@@ -55,7 +60,7 @@ const mockRedeemed: Product = {
 
 
 describe('CartContext: Lógica de Carrito y Totales', () => {
-    
+
     beforeEach(() => {
         localStorageMock.clear();
         vi.clearAllMocks();
@@ -63,7 +68,7 @@ describe('CartContext: Lógica de Carrito y Totales', () => {
 
     it('1. Deberia inicializar con un carrito empty(vacio) y contar 0', () => {
         const { result } = renderHook(() => useCart(), { wrapper: MockWrapper });
-        
+
         expect(result.current.cartCount).toBe(0);
         expect(result.current.totalPrice).toBe(0);
         expect(result.current.cartItems).toHaveLength(0);
@@ -75,9 +80,9 @@ describe('CartContext: Lógica de Carrito y Totales', () => {
         act(() => {
             result.current.addToCart(mockProductA, 2);
         });
-        
+
         expect(result.current.cartCount).toBe(2);
-        expect(result.current.totalPrice).toBe(20000); 
+        expect(result.current.totalPrice).toBe(20000);
         expect(result.current.cartItems).toHaveLength(1);
     });
 
@@ -87,39 +92,39 @@ describe('CartContext: Lógica de Carrito y Totales', () => {
         act(() => {
             result.current.addToCart(mockProductB, 1);
         });
-        
+
         act(() => {
             result.current.increaseQuantity(mockProductB.id);
         });
         act(() => {
-            result.current.increaseQuantity(mockProductB.id); 
+            result.current.increaseQuantity(mockProductB.id);
         });
-        
+
         expect(result.current.cartItems[0].quantity).toBe(2);
-        expect(result.current.totalPrice).toBe(100000); 
+        expect(result.current.totalPrice).toBe(100000);
     });
-    
+
     it('4. deberia remover el item cuando la cantidad disminuye a 0', () => {
         const { result } = renderHook(() => useCart(), { wrapper: MockWrapper });
 
         act(() => {
             result.current.addToCart(mockProductA, 1);
-            result.current.decreaseQuantity(mockProductA.id); 
+            result.current.decreaseQuantity(mockProductA.id);
         });
-        
+
         expect(result.current.cartCount).toBe(0);
         expect(result.current.cartItems).toHaveLength(0);
     });
-    
+
     it('5. "Vaciar carrito" deberia vaciar el carrito completo', () => {
         const { result } = renderHook(() => useCart(), { wrapper: MockWrapper });
 
         act(() => {
             result.current.addToCart(mockProductA, 1);
             result.current.addToCart(mockProductB, 1);
-            result.current.clearCart(); 
+            result.current.clearCart();
         });
-        
+
         expect(result.current.cartCount).toBe(0);
         expect(result.current.totalPrice).toBe(0);
     });
@@ -128,12 +133,12 @@ describe('CartContext: Lógica de Carrito y Totales', () => {
         const { result } = renderHook(() => useCart(), { wrapper: MockWrapper });
 
         act(() => {
-            result.current.addToCart(mockProductA, 1); 
+            result.current.addToCart(mockProductA, 1);
             result.current.addToCart(mockRedeemed, 1, true, 1000);
         });
-        
+
         expect(result.current.cartItems).toHaveLength(2);
-        expect(result.current.totalPrice).toBe(10000); 
+        expect(result.current.totalPrice).toBe(10000);
         expect(result.current.cartItems.find(i => i.isRedeemed)?.pointsCost).toBe(1000);
     });
 
@@ -176,7 +181,7 @@ describe('CartContext: Lógica de Carrito y Totales', () => {
             initialResult.current.addToCart(mockProductA, 2);
         });
 
-        expect(localStorageMock.setItem).toHaveBeenCalledWith('cart', JSON.stringify(initialResult.current.cartItems));
+        expect(localStorageMock.setItem).toHaveBeenCalledWith('cart_guest', JSON.stringify(initialResult.current.cartItems));
 
         const { result: finalResult } = renderHook(() => useCart(), { wrapper: MockWrapper });
 

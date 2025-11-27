@@ -12,6 +12,10 @@ vi.mock('axios', () => {
         post: vi.fn(),
         put: vi.fn(),
         defaults: { headers: { common: {} } },
+        interceptors: {
+            request: { use: vi.fn(), eject: vi.fn() },
+            response: { use: vi.fn(), eject: vi.fn() }
+        }
     };
 
     return {
@@ -38,8 +42,8 @@ const mockAdminData = {
     id: 'u1',
     name: 'Admin Test',
     email: 'test@admin.com',
-    rut: '12345678-9',            
-    age: 30,                      
+    rut: '12345678-9',
+    age: 30,
     role: 'admin',
     token: 'TEST_TOKEN_ADMIN',
     hasDuocDiscount: true,
@@ -76,7 +80,7 @@ describe('AuthContext: Gestión de Sesión y Persistencia', () => {
 
 
     it('1. debería inicializar el estado desde el localStorage al cargar', () => {
-        localStorageMock.getItem.mockReturnValueOnce(JSON.stringify(mockAdminData));
+        localStorageMock.setItem('user', JSON.stringify(mockAdminData));
         const { result } = renderHook(() => useAuth(), { wrapper: MockWrapper });
         expect(result.current.isLoggedIn).toBe(true);
     });
@@ -107,12 +111,12 @@ describe('AuthContext: Gestión de Sesión y Persistencia', () => {
         expect(localStorageMock.removeItem).toHaveBeenCalled();
     });
 
-    it('4. la funcion de logout deberia limpiar el estado de usuario en el localstorage', () => {
+    it('4. la funcion de logout deberia limpiar el estado de usuario en el localstorage', async () => {
         localStorageMock.setItem('user', JSON.stringify(mockAdminData));
         const { result } = renderHook(() => useAuth(), { wrapper: MockWrapper });
 
-        act(() => {
-            result.current.logout();
+        await act(async () => {
+            await result.current.logout();
         });
 
         expect(result.current.isLoggedIn).toBe(false);
@@ -132,8 +136,7 @@ describe('AuthContext: Gestión de Sesión y Persistencia', () => {
         expect(localStorageMock.setItem).toHaveBeenCalled();
     });
     it('6. la función de actualización de perfil debería tener éxito y actualizar el estado del usuario', async () => {
-
-        localStorageMock.getItem.mockReturnValueOnce(JSON.stringify(mockAdminData));
+        localStorageMock.setItem('user', JSON.stringify(mockAdminData));
 
         const { result } = renderHook(() => useAuth(), { wrapper: MockWrapper });
 
