@@ -1,7 +1,7 @@
 // level-up-gaming-frontend/src/pages/AdminRewardsPage.tsx
 import React, { useState, useEffect, FormEvent } from 'react';
 import { Container, Table, Alert, Spinner, Badge, Button, Modal, Row, Col, Form, Card, ButtonGroup } from 'react-bootstrap';
-import { Edit, Trash, ArrowLeft, PlusCircle, Check, X, AlertTriangle } from 'react-feather';
+import { Edit, Trash, ArrowLeft, PlusCircle, AlertTriangle, ToggleLeft, ToggleRight } from 'react-feather';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
 import AdminLayout from '../layouts/AdminLayout';
@@ -38,6 +38,10 @@ const AdminRewardsPage: React.FC = () => {
     const [statusMessage, setStatusMessage] = useState<{ msg: string; type: 'success' | 'danger' } | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
+
+    const [showToggleActiveModal, setShowToggleActiveModal] = useState(false);
+    const [itemToToggle, setItemToToggle] = useState<{ id: string; name: string; isActive: boolean } | null>(null);
+
     const [searchTerm, setSearchTerm] = useState('');
     const [pointsSortOrder, setPointsSortOrder] = useState<'asc' | 'desc' | ''>('');
 
@@ -92,14 +96,23 @@ const AdminRewardsPage: React.FC = () => {
         setSelectedReward(reward);
     };
 
-    const handleToggleActive = async (id: string, currentStatus: boolean, name: string) => {
-        const newStatus = !currentStatus;
+    const confirmToggleActive = (id: string, currentStatus: boolean, name: string) => {
+        setItemToToggle({ id, name, isActive: currentStatus });
+        setShowToggleActiveModal(true);
+    };
+
+    const executeToggleActive = async () => {
+        if (!itemToToggle) return;
+        const newStatus = !itemToToggle.isActive;
         try {
-            const { data } = await apiClient.put<Reward>(`${API_URL}/${id}/admin`, { isActive: newStatus });
-            setRewards(prev => prev.map(r => (r.id === id ? data : r)));
-            showStatus(`Recompensa "${name}" cambiada a: ${newStatus ? 'ACTIVA' : 'INACTIVA'}.`, 'success');
+            const { data } = await apiClient.put<Reward>(`${API_URL}/${itemToToggle.id}/admin`, { isActive: newStatus });
+            setRewards(prev => prev.map(r => (r.id === itemToToggle.id ? data : r)));
+            showStatus(`Recompensa "${itemToToggle.name}" cambiada a: ${newStatus ? 'ACTIVA' : 'INACTIVA'}.`, 'success');
         } catch (err) {
             showStatus('Fallo al cambiar el estado de la recompensa.', 'danger');
+        } finally {
+            setShowToggleActiveModal(false);
+            setItemToToggle(null);
         }
     };
 
@@ -168,18 +181,23 @@ const AdminRewardsPage: React.FC = () => {
                     </thead>
                     <tbody>
                         {filteredAndSortedRewards.map(reward => (
-                            <tr key={reward.id}>
+                            <tr key={reward.id} className={!reward.isActive ? 'text-muted' : ''} style={{ opacity: reward.isActive ? 1 : 0.6 }}>
                                 <td>{reward.name}</td>
                                 <td>{reward.pointsCost}</td>
                                 <td><Badge bg="info">{reward.type}</Badge></td>
                                 <td><Badge bg={reward.season === 'Standard' ? 'secondary' : 'warning'}>{reward.season}</Badge></td>
-                                <td>
-                                    <Button variant={reward.isActive ? 'success' : 'danger'} size="sm" onClick={() => handleToggleActive(reward.id, reward.isActive, reward.name)}>
-                                        {reward.isActive ? <Check size={14} /> : <X size={14} />}
-                                    </Button>
-                                </td>
+                                <td><Badge bg={reward.isActive ? 'success' : 'secondary'}>{reward.isActive ? 'Activa' : 'Inactiva'}</Badge></td>
                                 <td>
                                     <Button variant="info" size="sm" className="me-2" onClick={() => handleEdit(reward)}><Edit size={14} /></Button>
+                                    <Button
+                                        variant={reward.isActive ? 'warning' : 'success'}
+                                        size="sm"
+                                        className="me-2"
+                                        onClick={() => confirmToggleActive(reward.id, reward.isActive, reward.name)}
+                                        title={reward.isActive ? 'Desactivar' : 'Activar'}
+                                    >
+                                        {reward.isActive ? <ToggleLeft size={14} /> : <ToggleRight size={14} />}
+                                    </Button>
                                     <Button variant="danger" size="sm" onClick={() => confirmDelete(reward.id, reward.name)}><Trash size={14} /></Button>
                                 </td>
                             </tr>
@@ -191,7 +209,7 @@ const AdminRewardsPage: React.FC = () => {
             <Row className="d-block d-md-none g-3">
                 {filteredAndSortedRewards.map(reward => (
                     <Col xs={12} key={reward.id}>
-                        <Card style={{ backgroundColor: '#222', border: '1px solid #1E90FF', color: 'white' }}>
+                        <Card style={{ backgroundColor: '#222', border: `1px solid ${reward.isActive ? '#1E90FF' : '#555'}`, color: 'white', opacity: reward.isActive ? 1 : 0.7 }}>
                             <Card.Body>
                                 <div className="d-flex justify-content-between">
                                     <h5 style={{ color: '#39FF14' }}>{reward.name}</h5>
@@ -205,7 +223,11 @@ const AdminRewardsPage: React.FC = () => {
                                 </div>
                                 <div className="d-grid gap-2">
                                     <Button variant="info" size="sm" onClick={() => handleEdit(reward)}><Edit size={14} /> Editar</Button>
-                                    <Button variant={reward.isActive ? 'danger' : 'success'} size="sm" onClick={() => handleToggleActive(reward.id, reward.isActive, reward.name)}>
+                                    <Button
+                                        variant={reward.isActive ? 'warning' : 'success'}
+                                        size="sm"
+                                        onClick={() => confirmToggleActive(reward.id, reward.isActive, reward.name)}
+                                    >
                                         {reward.isActive ? 'Desactivar' : 'Activar'}
                                     </Button>
                                     <Button variant="outline-danger" size="sm" onClick={() => confirmDelete(reward.id, reward.name)}><Trash size={14} /> Eliminar</Button>
@@ -228,6 +250,13 @@ const AdminRewardsPage: React.FC = () => {
                 handleClose={() => setShowDeleteModal(false)}
                 handleDelete={handleDelete}
                 itemName={itemToDelete?.name || 'esta recompensa'}
+            />
+            <ConfirmToggleActiveModal
+                show={showToggleActiveModal}
+                handleClose={() => setShowToggleActiveModal(false)}
+                handleConfirm={executeToggleActive}
+                itemName={itemToToggle?.name || 'esta recompensa'}
+                isActivating={!itemToToggle?.isActive}
             />
         </AdminLayout>
     );
@@ -257,6 +286,35 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({ show, handleClo
         <Modal.Footer style={{ backgroundColor: '#111' }}>
             <Button variant="secondary" onClick={handleClose}>Cancelar</Button>
             <Button variant="danger" onClick={handleDelete}>Eliminar</Button>
+        </Modal.Footer>
+    </Modal>
+);
+
+// ---------- Confirm Toggle Active Modal ----------
+interface ConfirmToggleActiveModalProps {
+    show: boolean;
+    handleClose: () => void;
+    handleConfirm: () => void;
+    itemName: string;
+    isActivating: boolean;
+}
+
+const ConfirmToggleActiveModal: React.FC<ConfirmToggleActiveModalProps> = ({ show, handleClose, handleConfirm, itemName, isActivating }) => (
+    <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton style={{ backgroundColor: '#111', borderBottomColor: isActivating ? '#39FF14' : '#FFC107' }}>
+            <Modal.Title style={{ color: isActivating ? '#39FF14' : '#FFC107' }}>
+                <AlertTriangle size={24} className="me-2" /> Confirmar {isActivating ? 'Activación' : 'Desactivación'}
+            </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ backgroundColor: '#222', color: 'white' }}>
+            <p>¿Estás seguro de que deseas <strong>{isActivating ? 'ACTIVAR' : 'DESACTIVAR'}</strong> la recompensa <strong style={{ color: '#39FF14' }}>{itemName}</strong>?</p>
+            <Alert variant={isActivating ? 'success' : 'warning'} className="mt-3">
+                {isActivating ? 'La recompensa volverá a ser visible para los usuarios.' : 'La recompensa se ocultará de la tienda de canje.'}
+            </Alert>
+        </Modal.Body>
+        <Modal.Footer style={{ backgroundColor: '#111' }}>
+            <Button variant="secondary" onClick={handleClose}>Cancelar</Button>
+            <Button variant={isActivating ? 'success' : 'warning'} onClick={handleConfirm}>Sí, {isActivating ? 'Activar' : 'Desactivar'}</Button>
         </Modal.Footer>
     </Modal>
 );

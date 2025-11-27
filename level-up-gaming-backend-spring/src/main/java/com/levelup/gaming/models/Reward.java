@@ -1,6 +1,7 @@
 package com.levelup.gaming.models;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ public class Reward {
     private String name;
     private int pointsCost;
     private String description;
+    @JsonProperty("isActive")
     private boolean isActive;
     private String season;
     private String imageUrl;

@@ -46,8 +46,8 @@ public class RewardController {
                         reward.setPointsCost(rewardDetails.getPointsCost());
                     if (rewardDetails.getDescription() != null)
                         reward.setDescription(rewardDetails.getDescription());
-                    if (rewardDetails.getActive() != null)
-                        reward.setActive(rewardDetails.getActive());
+                    if (rewardDetails.getIsActive() != null)
+                        reward.setActive(rewardDetails.getIsActive());
                     if (rewardDetails.getSeason() != null)
                         reward.setSeason(rewardDetails.getSeason());
                     if (rewardDetails.getImageUrl() != null)
