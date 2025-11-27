@@ -141,7 +141,9 @@ const RegisterPage: React.FC = () => {
 
         } catch (err: any) {
             console.error(err);
-            const errorMessage = err.response?.data?.message || 'Error desconocido durante el registro.';
+            const errorMessage = typeof err.response?.data === 'string'
+                ? err.response.data
+                : err.response?.data?.message || 'Error desconocido durante el registro.';
             setError(errorMessage);
         } finally {
             setLoading(false);
@@ -173,7 +175,11 @@ const RegisterPage: React.FC = () => {
                                             type="text"
                                             placeholder="Ingresa tu nombre"
                                             value={name}
-                                            onChange={(e) => setName(e.target.value)}
+                                            onChange={(e) => {
+                                                const val = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "").slice(0, 30);
+                                                setName(val);
+                                            }}
+                                            maxLength={30}
                                             required
                                             style={{ backgroundColor: '#222', color: 'white' }}
                                         />
@@ -186,7 +192,11 @@ const RegisterPage: React.FC = () => {
                                             type="email"
                                             placeholder="Incluye @duocuc.cl para 20% OFF de por vida"
                                             value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                                            onChange={(e) => {
+                                                const val = e.target.value.replace(/\s/g, "").slice(0, 50);
+                                                setEmail(val);
+                                            }}
+                                            maxLength={20}
                                             required
                                             isInvalid={email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)}
                                             style={{ backgroundColor: '#222', color: 'white' }}

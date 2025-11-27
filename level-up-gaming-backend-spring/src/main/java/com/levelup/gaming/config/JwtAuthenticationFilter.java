@@ -13,6 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.Date;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -48,6 +49,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .roles(user.getRole().toUpperCase())
                             .build();
                     if (jwtService.isTokenValid(jwt, userDetails.getUsername())) {
+                        // Check if token was issued before the last logout
+                        Date issuedAt = jwtService.extractIssuedAt(jwt);
+                        System.out.println("DEBUG: Token validation - User: " + user.getEmail());
+                        System.out.println("DEBUG: Token IssuedAt: " + issuedAt);
+                        System.out.println("DEBUG: User LastLogout: " + user.getLastLogout());
+
+                        if (user.getLastLogout() != null && issuedAt.before(user.getLastLogout())) {
+                            System.out.println("DEBUG: Token invalid - Issued before last logout");
+                            // Token is invalid because user logged out after it was issued
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            return;
+                        }
+                        System.out.println("DEBUG: Token valid");
+
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

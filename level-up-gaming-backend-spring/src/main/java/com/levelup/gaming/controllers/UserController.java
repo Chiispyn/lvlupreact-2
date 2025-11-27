@@ -45,6 +45,31 @@ public class UserController {
         }
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String token) {
+        try {
+            // The token is already validated by the filter at this point if we are here
+            // (and authenticated)
+            // But we need to extract the user to update the lastLogout time.
+            // Actually, since we are authenticated, we can get the user from
+            // SecurityContext or just extract from token again.
+
+            String jwt = token.substring(7);
+            String userEmail = jwtService.extractUsername(jwt);
+            System.out.println("DEBUG: Logout request for user: " + userEmail);
+
+            userRepository.findByEmail(userEmail).ifPresent(user -> {
+                user.setLastLogout(new java.util.Date());
+                userRepository.save(user);
+                System.out.println("DEBUG: Updated lastLogout to: " + user.getLastLogout());
+            });
+
+            return ResponseEntity.ok("Logged out successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error during logout");
+        }
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
@@ -59,6 +84,14 @@ public class UserController {
             user.setRole("user");
         if (user.getPoints() == 0)
             user.setPoints(0);
+
+        // Check for Duoc discount
+        String email = user.getEmail().toLowerCase();
+        if (email.endsWith("@duoc.cl") || email.endsWith("@duocuc.cl") || email.endsWith("@profesor.duocuc.cl")) {
+            user.setHasDuocDiscount(true);
+        } else {
+            user.setHasDuocDiscount(false);
+        }
 
         // Generate referral code automatically
         String baseCode = user.getName().length() >= 3 ? user.getName().substring(0, 3).toUpperCase() : "USR";

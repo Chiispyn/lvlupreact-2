@@ -95,9 +95,52 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     // Función de Logout
-    const logout = () => {
-        setUser(null);
+    const logout = async () => {
+        try {
+            if (user?.token) {
+                await apiClient.post('/users/logout');
+            }
+        } catch (error) {
+            console.error("Logout failed on server", error);
+        } finally {
+            // Always clear local state
+            setUser(null);
+            localStorage.removeItem('user');
+            delete apiClient.defaults.headers.common['Authorization'];
+        }
     };
+
+    // Listen for storage events to sync logout across tabs
+    useEffect(() => {
+        const handleStorageChange = (event: StorageEvent) => {
+            if (event.key === 'user' && event.newValue === null) {
+                setUser(null);
+                delete apiClient.defaults.headers.common['Authorization'];
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
+
+    // Axios interceptor to handle 401 Unauthorized responses
+    useEffect(() => {
+        const interceptor = apiClient.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                if (error.response && error.response.status === 401) {
+                    logout();
+                }
+                return Promise.reject(error);
+            }
+        );
+
+        return () => {
+            apiClient.interceptors.response.eject(interceptor);
+        };
+    }, []);
 
     const register = async (name: string, email: string, password: string): Promise<boolean> => {
         try {

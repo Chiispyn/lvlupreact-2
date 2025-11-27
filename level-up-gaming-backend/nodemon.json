@@ -1,5 +1,0 @@
-{
-  "watch": ["src"],
-  "ext": "ts,json",
-  "exec": "swc src -d dist && node dist/src/index.js"
-}
