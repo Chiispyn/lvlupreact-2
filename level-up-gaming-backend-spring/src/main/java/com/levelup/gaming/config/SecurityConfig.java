@@ -84,6 +84,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints - no authentication required
                         .requestMatchers("/api/users/login", "/api/users/register").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/blog/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/events/**").permitAll()
@@ -95,7 +96,7 @@ public class SecurityConfig {
 
                         // Admin CRUD operations
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/products/**", "/api/videos/**",
-                                "/api/rewards/**", "/api/events/**","/api/blog/admin")
+                                "/api/rewards/**", "/api/events/**", "/api/blog/admin")
                         .authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/products/**", "/api/videos/**",
                                 "/api/rewards/**", "/api/events/**", "/api/blog/**")

@@ -82,6 +82,11 @@ La aplicación correrá en `http://localhost:5173`.
 -   `GET /api/rewards`: Listar recompensas disponibles.
 -   `POST /api/rewards/admin`: Crear nueva recompensa (Admin).
 
+### 📖 Documentación de API (Swagger)
+El backend incluye documentación interactiva generada automáticamente con **Swagger / OpenAPI**.
+Una vez que el servidor backend esté corriendo, puedes acceder a ella en:
+👉 `http://localhost:8080/swagger-ui/index.html`
+
 ---
 
 ## 🧪 Testing
@@ -102,4 +107,3 @@ npm test
 -   `SECURE_PASSWORD_RESET_GUIDE.md`: Guía técnica para implementar recuperación de contraseña segura en producción.
 -   `QUICK_START.md`: Guía rápida de inicio.
 
-> **Nota**: El backend antiguo en Node.js (`level-up-gaming-backend`) se mantiene como referencia pero el desarrollo activo está en la versión Spring Boot.
