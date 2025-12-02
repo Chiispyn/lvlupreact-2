@@ -4,6 +4,13 @@ Si al intentar crear un producto con imagen recibes un error 403 o "PacketTooBig
 
 TIENES QUE CONFIGURAR ESTO EN EL COMPUTADOR DONDE CORRA LA BASE DE DATOS (XAMPP):
 
+OPCIÓN RÁPIDA (Temporal, se borra al reiniciar MySQL):
+1. Abre una terminal (PowerShell o CMD).
+2. Pega y ejecuta este comando:
+   C:\xampp\mysql\bin\mysql.exe -u root -e "SET GLOBAL max_allowed_packet=67108864;"
+3. ¡Listo! Ya puedes usar la app.
+
+OPCIÓN PERMANENTE (Recomendada):
 1. Abre el Panel de Control de XAMPP.
 2. Detén el servicio "MySQL" (Botón Stop).
 3. Haz clic en el botón "Config" de la fila de MySQL y elige "my.ini".
