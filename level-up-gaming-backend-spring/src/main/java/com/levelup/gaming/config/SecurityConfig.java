@@ -82,6 +82,9 @@ public class SecurityConfig {
                     return corsConfiguration;
                 }))
                 .authorizeHttpRequests(auth -> auth
+                        // Allow OPTIONS requests for CORS preflight
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
                         // Public endpoints - no authentication required
                         .requestMatchers("/api/users/login", "/api/users/register").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
@@ -95,7 +98,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").authenticated()
 
                         // Admin CRUD operations
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/products/**", "/api/videos/**",
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/products", "/api/products/**",
+                                "/api/videos/**",
                                 "/api/rewards/**", "/api/events/**", "/api/blog/admin")
                         .authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/products/**", "/api/videos/**",

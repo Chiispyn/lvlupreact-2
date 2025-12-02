@@ -32,6 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -39,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jwt = authHeader.substring(7);
         try {
             String userEmail = jwtService.extractUsername(jwt);
+
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 var userOpt = userRepository.findByEmail(userEmail);
                 if (userOpt.isPresent()) {
@@ -51,17 +53,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     if (jwtService.isTokenValid(jwt, userDetails.getUsername())) {
                         // Check if token was issued before the last logout
                         Date issuedAt = jwtService.extractIssuedAt(jwt);
-                        System.out.println("DEBUG: Token validation - User: " + user.getEmail());
-                        System.out.println("DEBUG: Token IssuedAt: " + issuedAt);
-                        System.out.println("DEBUG: User LastLogout: " + user.getLastLogout());
 
                         if (user.getLastLogout() != null && issuedAt.before(user.getLastLogout())) {
-                            System.out.println("DEBUG: Token invalid - Issued before last logout");
-                            // Token is invalid because user logged out after it was issued
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             return;
                         }
-                        System.out.println("DEBUG: Token valid");
 
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
@@ -71,9 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Token is invalid or expired, ignore and proceed as anonymous
-            // This allows public endpoints (like /register) to work even if a stale token
-            // is sent
+            // Log error if needed, but don't print stack trace to console in production
         }
         filterChain.doFilter(request, response);
     }

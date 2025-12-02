@@ -19,6 +19,7 @@ public class Product {
     @Column(length = 1000)
     private String description;
     private double price;
+    @Column(columnDefinition = "LONGTEXT")
     private String imageUrl;
     private double rating;
     private int numReviews;

@@ -21,6 +21,7 @@ public class Reward {
     @JsonProperty("isActive")
     private boolean isActive;
     private String season;
+    @Column(columnDefinition = "LONGTEXT")
     private String imageUrl;
 
     // Campos para descuentos dinámicos
